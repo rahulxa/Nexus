@@ -1,19 +1,26 @@
 import connectDB from "./db/index.js";
 import dotenv from "dotenv"
 import { app } from "./app.js";
+import { createServer } from "node:http"
+import { Server } from "socket.io"
+import connectToSocket from "./socket/socketManager.js";
 
-const PORT = 3002
 dotenv.config({
     path: "./env"
 })
 
+const server = createServer(app);
+const io = connectToSocket(server)
+
+const PORT = process.env.PORT || 8080;
+
 connectDB()
     .then(() => {
-        app.on("error", (err) => {
+        server.on("error", (err) => {
             console.log("error connecting to the server:", err)
             throw err;
         });
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log("server listening at port:", PORT)
         });
     })
