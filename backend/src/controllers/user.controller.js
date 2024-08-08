@@ -1,6 +1,8 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.models.js"
 import httpStatus from "http-status"
+import { ApiError } from "../utils/apiError.js"
+import { ApiResponse } from "../utils/apiResponse.js"
 
 
 const resgisterUser = asyncHandler(async (req, res) => {
@@ -31,12 +33,12 @@ const resgisterUser = asyncHandler(async (req, res) => {
     if (!createdUser) {
         return res
             .status(httpStatus.INTERNAL_SERVER_ERROR)
-            .json({ messsage: "Something went wrong while creating the user" })
+            .json(new ApiError("Something went wrong while registering the user"))
     }
 
     return res
         .status(httpStatus.CREATED)
-        .json({ message: "User registered Successfully" })
+        .json(new ApiResponse(createdUser, "User created successfully"))
 });
 
 
