@@ -4,6 +4,9 @@ import cors from "cors"
 import cookieParser from "cookie-parser";
 
 
+import userRouter from "./routes/user.routes.js";
+
+
 const app = express();
 
 const corsOptions = {
@@ -16,8 +19,15 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser()); //cookies for storing access and refresh tokens
 
+
 // app.get("/home", (req, res) => {
 //     res.json({ "hello": "niggachu" })
 // })
+
+
+//routes
+
+app.use("/api/v1/users", userRouter);
+
 
 export { app }

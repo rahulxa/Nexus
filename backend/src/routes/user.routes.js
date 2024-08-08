@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { generateAccessAndRefreshTokens, loginUser, logoutUser, registerUser } from "../controllers/user.controller";
+import {
+    generateAccessAndRefreshTokens,
+    loginUser, logoutUser, registerUser
+} from "../controllers/user.controller.js";
 
 const userRouter = Router();
 

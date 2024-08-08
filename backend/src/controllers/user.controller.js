@@ -79,14 +79,14 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     try {
-        const user = User.findOne({ username });
+        const user = await User.findOne({ username });
         if (!user) {
             return res
                 .status(httpStatus.NOT_FOUND)
                 .json(new ApiError("User with this username does not exists"))
         }
-
         const checkPassword = await user.isPasswordCorrect(password);
+       
         if (!checkPassword) {
             return res
                 .status(httpStatus.UNAUTHORIZED)
