@@ -1,6 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.models.js"
 import httpStatus from "http-status"
+import Jwt from "jsonwebtoken"
 import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 
@@ -140,8 +141,55 @@ const logoutUser = asyncHandler(async (req, res) => {
             .clearCookie("refreshToken", options)
             .json(new ApiResponse("User logged out Sucessfully"))
     } catch (error) {
-
+        return res
+            .status(httpStatus.INTERNAL_SERVER_ERROR)
+            .json(new ApiError(error, "An unexpected error occurred"));
     }
 });
 
-export { registerUser, loginUser, logoutUser }
+
+const generateNewAccessToken = asyncHandler(async (req, res) => {
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body.refreshToken;
+
+    if (!incomingRefreshToken) {
+        return res
+            .status(httpStatus.UNAUTHORIZED)
+            .json("Unauthorized Request")
+    }
+
+    try {
+        const verifyToken = Jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+        const user = await User.findById(verifyToken._id).select("-password")
+        if (!user) {
+            return res
+                .status(httpStatus.NOT_FOUND)
+                .json("User not found")
+        }
+
+        if (user?.refreshToken !== incomingRefreshToken) {
+            return res
+                .status(httpStatus.UNAUTHORIZED)
+                .json("User not authorized")
+        }
+
+        const { accessToken, refreshToken } = generateAccessAndRefreshTokens(user._id);
+
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+
+        return res
+            .status(httpStatus.OK)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(new ApiResponse({ user: accessToken, refreshToken }, "New tokens generated successfully"))
+    } catch (error) {
+        return res
+            .status(httpStatus.INTERNAL_SERVER_ERROR)
+            .json(new ApiError(error, "An unexpected error occurred"));
+    }
+})
+
+export { registerUser, loginUser, logoutUser, generateAccessAndRefreshTokens }
