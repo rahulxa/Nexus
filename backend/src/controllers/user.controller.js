@@ -86,7 +86,7 @@ const loginUser = asyncHandler(async (req, res) => {
                 .json(new ApiError("User with this username does not exists"))
         }
         const checkPassword = await user.isPasswordCorrect(password);
-       
+
         if (!checkPassword) {
             return res
                 .status(httpStatus.UNAUTHORIZED)
@@ -192,4 +192,4 @@ const generateNewAccessToken = asyncHandler(async (req, res) => {
     }
 })
 
-export { registerUser, loginUser, logoutUser, generateAccessAndRefreshTokens }
+export { registerUser, loginUser, logoutUser, generateNewAccessToken }
