@@ -9,10 +9,10 @@ dotenv.config({
     path: "./env"
 })
 
+const PORT = process.env.PORT || 8080;
+
 const server = createServer(app);
 const io = connectToSocket(server)
-
-const PORT = process.env.PORT || 8080;
 
 connectDB()
     .then(() => {
