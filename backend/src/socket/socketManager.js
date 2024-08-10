@@ -37,7 +37,6 @@ const connectToSocket = (server) => {
                     if (!isFound && roomValue.includes(socket.id)) {
                         return [roomKey, true]
                     }
-
                     return [room, isFound]
                 }, ["", false]);
 
@@ -55,7 +54,27 @@ const connectToSocket = (server) => {
         });
 
         socket.on("disconnect", () => {
+            var diffTime = Math.abs(timeOnline[socket.id] - new Date());
 
+            var key;
+
+            for (const [room, person] of JSON.parse(JSON.stringify(Object.entries(connections)))) {
+                for (let a = 0; a < person.length; a++) {
+                    if (room[a] === socket.id) {
+                        key = k;
+                        for (let a = 0; a < connections[key].length; a++) {
+                            io.to(connections[key][a]).emit('user-left', socket.id)
+                        }
+
+                        var index = connections[key].indexOf(socket.id)
+
+                        connections[key].splice(index, 1)
+                        if (connections[key].length === 0) {
+                            delete connections[key]
+                        }
+                    }
+                }
+            }
         })
     });
 
