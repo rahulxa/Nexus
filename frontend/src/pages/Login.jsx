@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import GradualSpacing from '../components/magicui/GradualSpacing';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -19,7 +20,7 @@ const Login = () => {
             <div className="w-96 bg-gray-900 bg-opacity-80 rounded-lg p-8 shadow-lg border border-cyan-400 relative z-10 mt-20">
                 <GradualSpacing className="text-3xl font-bold text-center mb-6 text-white">
                     <span>Login to </span>
-                    <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-400">NEXUS</span>
+                    <span className="inline-block ml-1 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-400">NEXUS</span>
                 </GradualSpacing>
                 <form className="space-y-6">
                     <div>
@@ -57,7 +58,9 @@ const Login = () => {
                 </div>
                 <div className="mt-6 text-center">
                     <span className="text-gray-300">Don't have an account? </span>
-                    <a href="#" className="text-cyan-400 hover:underline">Register Now</a>
+                    <Link to="/register">
+                        <a href="#" className="text-cyan-400 hover:underline">Register Now</a>
+                    </Link>
                 </div>
             </div>
         </div>
