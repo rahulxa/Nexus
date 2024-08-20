@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 const WordRotate = ({
     words,
-    duration = 2000,
+    duration = 1500,
     framerProps = {
         initial: { opacity: 0, y: -50 },
         animate: { opacity: 1, y: 0 },
