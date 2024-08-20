@@ -27,6 +27,7 @@ const Login = () => {
                             className="w-full p-3 bg-gray-800 text-white placeholder-gray-400 border border-cyan-400 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
                             type="text"
                             placeholder="Username"
+                            autoComplete="off"
                         />
                     </div>
                     <div className="relative">
@@ -34,7 +35,7 @@ const Login = () => {
                             className="w-full p-3 bg-gray-800 text-white placeholder-gray-400 border border-cyan-400 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 transition duration-300"
                             type={showPassword ? "text" : "password"}
                             placeholder="Password"
-
+                            autoComplete="off"
                         />
                         <button
                             type="button"
@@ -56,7 +57,7 @@ const Login = () => {
                 </div>
                 <div className="mt-6 text-center">
                     <span className="text-gray-300">Don't have an account? </span>
-                    <a href="#" className="text-cyan-400 hover:underline">Sign up</a>
+                    <a href="#" className="text-cyan-400 hover:underline">Register Now</a>
                 </div>
             </div>
         </div>
