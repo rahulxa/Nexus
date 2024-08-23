@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import GradualSpacing from '../components/magicui/GradualSpacing';
+import axios from "axios"
+import httpStatus from "http-status";
 
 const Authentication = () => {
-
     const [signup, setSignup] = useState(true)
+    const [username, setUsername] = useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
     const [showPassword, setShowPassword] = useState(false);
 
     const togglePasswordVisibility = () => {
@@ -16,9 +19,22 @@ const Authentication = () => {
         setSignup(prev => !prev);
     }
 
-    const registerOrLoginUser = (e) => {
+    const registerOrLoginUser = async (e) => {
         e.preventDefault()
         setSignup(false);
+        try {
+            if (username && email && password !== "") {
+                const userDetails = {
+                    username: username,
+                    email: email,
+                    password: password
+                }
+                const response = await axios.post("http://localhost:8080/api/v1/users/register", userDetails)
+                console.log("this is response", response)
+            }
+        } catch (error) {
+
+        }
     }
 
     return (
@@ -47,6 +63,8 @@ const Authentication = () => {
                             type="text"
                             placeholder="Username"
                             autoComplete="off"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                         />
                     </div>
                     {signup && (
@@ -56,6 +74,8 @@ const Authentication = () => {
                                 type="text"
                                 placeholder="email"
                                 autoComplete="off"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
                     )}
@@ -65,6 +85,8 @@ const Authentication = () => {
                             type={showPassword ? "text" : "password"}
                             placeholder="Password"
                             autoComplete="off"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
                         <button
                             type="button"
