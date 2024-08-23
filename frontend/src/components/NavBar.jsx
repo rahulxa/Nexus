@@ -10,20 +10,17 @@ function NavBar() {
                 <div className='flex items-center justify-between h-20'>
                     <div className='flex items-center'>
                         <Link to="/">
-                            <img src='MyLogo.png' className='h-16 w-auto' alt="Logo" />
+                            <img src='MyLogo.png' className='h-20 w-auto' alt="Logo" />
                         </Link>
+                    </div>
+                    <div className='flex items-center space-x-4'>
                         <Link to="/Join as guest">
                             <ShinyButton text="Join as Guest" className="ml-2">
                                 <ArrowRightIcon className="size-3 ml-1 mt-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
                             </ShinyButton>
                         </Link>
-                    </div>
-                    <div className='flex items-center space-x-4'>
-                        <Link to="/register">
-                            <ShinyButton text="Register" />
-                        </Link>
-                        <Link to="/login">
-                            <ShinyButton text="Login" className="font-semibold" />
+                        <Link to="/authentication">
+                            <ShinyButton text="Sign In" />
                         </Link>
                     </div>
                 </div>
