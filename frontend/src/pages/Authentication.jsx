@@ -3,6 +3,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import GradualSpacing from '../components/magicui/GradualSpacing';
 import axios from "axios";
 import httpStatus from "http-status";
+import { useNavigate } from "react-router-dom";
 
 const Authentication = () => {
     axios.defaults.withCredentials = true;
@@ -12,6 +13,8 @@ const Authentication = () => {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState({ type: '', content: '' });
+
+    const navigate = useNavigate();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -26,6 +29,9 @@ const Authentication = () => {
         try {
             const userDetails = { username, password }
             const loggedInUser = await axios.post("http://localhost:8080/api/v1/users/login", userDetails);
+            if (loggedInUser.status === httpStatus.OK) {
+                navigate("/logout");
+            }
         } catch (error) {
             if (error.response && error.response.data) {
                 setMessage({ type: 'error', content: error.response.data.message });
@@ -61,7 +67,10 @@ const Authentication = () => {
             style={{ backgroundImage: 'url(back2.jpg)' }}>
             <div className="absolute inset-0 bg-black opacity-50 backdrop-filter backdrop-blur-md"></div>
             <div className="w-96 bg-gray-900 bg-opacity-80 rounded-lg p-8 shadow-lg border border-cyan-400 relative z-10 mt-20">
-                <GradualSpacing className="text-3xl font-bold text-center mb-6 text-white">
+                <GradualSpacing
+                    className="text-3xl font-bold text-center mb-6 text-white"
+                    key={signup ? 'signup' : 'login'} // Add this line
+                >
                     <span className="mr-1">{signup ? 'Join' : 'Login to'}</span>
                     <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-400">NEXUS</span>
                     {signup && <span className="ml-1">Today</span>}
@@ -76,10 +85,14 @@ const Authentication = () => {
                         } 
                     transition-all duration-300 ease-in-out
                 `}>
-                        <p className="text-sm font-medium">
-                            {message.type === 'error' ? '⚠️ ' : '✅ '}
-                            {message.content}
-                        </p>
+                        <div className='flex flex-row'>
+                            <p className="text-sm">
+                                {message.type === 'error' ? '⚠️ ' : '✅ '}
+                            </p>
+                            <p className='text-sm font-medium ml-1'>
+                                {message.content}
+                            </p>
+                        </div>
                     </div>
                 )}
 
@@ -138,7 +151,7 @@ const Authentication = () => {
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

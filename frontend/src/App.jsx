@@ -3,6 +3,7 @@ import NavBar from "./components/NavBar"
 import Footer from "./components/Footer"
 import Landing from "./pages/Landing"
 import Authentication from "./pages/Authentication"
+import Logout from "./pages/Logout"
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/authentication" element={<Authentication />}></Route>
+          <Route path="/logout" element={<Logout />} />
         </Routes>
         <Footer />
       </BrowserRouter>
