@@ -4,6 +4,7 @@ import httpStatus from "http-status"
 import Jwt from "jsonwebtoken"
 import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
+import userRouter from "../routes/user.routes.js";
 
 
 const generateAccessAndRefreshTokens = async (userid) => {
@@ -28,7 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
     if ([email, password, username].some((field) => field?.trim() === "")) {
         return res
             .status(httpStatus.BAD_REQUEST)
-            .json(new ApiError("All fields are required"));
+            .json({ message: "All fields are required" });
     }
 
     try {
@@ -39,7 +40,7 @@ const registerUser = asyncHandler(async (req, res) => {
         if (existingUser) {
             return res
                 .status(httpStatus.CONFLICT)
-                .json(new ApiError("User with this username or email already exists, if you already have an account please login to continue!"));
+                .json({ message: "User with this username or email already exists, if you already have an account please login to continue!" });
         }
 
         const user = await User.create({
@@ -53,17 +54,17 @@ const registerUser = asyncHandler(async (req, res) => {
         if (!createdUser) {
             return res
                 .status(httpStatus.INTERNAL_SERVER_ERROR)
-                .json(new ApiError("Something went wrong while registering the user"));
+                .json({ message: "Something went wrong while registering the user. Please try again" });
         }
 
         return res
             .status(httpStatus.CREATED)
-            .json(new ApiResponse(createdUser, "User created successfully"));
+            .json(new ApiResponse(createdUser, "Account created successfully.Please login to continue"));
 
     } catch (error) {
         return res
             .status(httpStatus.INTERNAL_SERVER_ERROR)
-            .json(new ApiError(error, "An unexpected error occurred"));
+            .json({ message: "An unexpected error occoured" });
     }
 });
 
@@ -71,11 +72,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { username, password } = req.body;
-
+    
     if (!username && !password) {
         return res
             .status(httpStatus.BAD_REQUEST)
-            .json(new ApiError("Username and password is required"))
+            .json({ message: "Username and password is required" })
     }
 
     try {
@@ -83,20 +84,19 @@ const loginUser = asyncHandler(async (req, res) => {
         if (!user) {
             return res
                 .status(httpStatus.NOT_FOUND)
-                .json(new ApiError("User with this username does not exists"))
+                .json({ message: "User with this username does not exists" })
         }
         const checkPassword = await user.isPasswordCorrect(password);
 
         if (!checkPassword) {
             return res
                 .status(httpStatus.UNAUTHORIZED)
-                .json(new ApiError("Wrong Password!"))
+                .json({ message: "Wrong Password!" })
         }
 
         const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
         const loggedInUser = await User.findById(user._id).select("-password")
-
         const options = {
             httpOnly: true,
             secure: true
@@ -110,7 +110,7 @@ const loginUser = asyncHandler(async (req, res) => {
     } catch (error) {
         return res
             .status(httpStatus.INTERNAL_SERVER_ERROR)
-            .json(new ApiError(error, "An unexpected error occurred"));
+            .json({ message: "An unexpected error occurred" });
     }
 });
 

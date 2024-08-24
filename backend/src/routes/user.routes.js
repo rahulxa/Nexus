@@ -3,11 +3,12 @@ import {
     generateNewAccessToken,
     loginUser, logoutUser, registerUser
 } from "../controllers/user.controller.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const userRouter = Router();
 
 userRouter.route("/login").post(loginUser)
-userRouter.route("/logout").post(logoutUser)
+userRouter.route("/logout").post(verifyJWT, logoutUser)
 userRouter.route("/register").post(registerUser)
 userRouter.route("/get-tokens").post(generateNewAccessToken)
 userRouter.route("/add-to-activity")
