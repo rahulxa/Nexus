@@ -84,7 +84,7 @@ const loginUser = asyncHandler(async (req, res) => {
         if (!user) {
             return res
                 .status(httpStatus.NOT_FOUND)
-                .json({ message: "User with this username does not exists" })
+                .json({ message: "User with this username does not exists." })
         }
         const checkPassword = await user.isPasswordCorrect(password);
 
