@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react'
-
+import ShinyButton from '../components/magicui/ShinyButton';
+import { useEffect } from 'react';
 
 const serverUrl = "http://localhost:8080";
 
@@ -34,10 +35,104 @@ function VideoMeet() {
 
     // }
 
+    const getPermissions = async () => {
+        try {
+            //allowing video access
+            const videoPermisson = await navigator.mediaDevices.getUserMedia({ video: true });
+            console.log("vid per:", videoPermisson)
+            if (videoPermisson) {
+                setVideoAvailable(true)
+            } else {
+                setVideoAvailable(false)
+            }
+            //allowing audio access
+            const audioPermisson = await navigator.mediaDevices.getUserMedia({ audio: true });
+            if (audioPermisson) {
+                setAudioAvailable(true)
+            } else {
+                setAudioAvailable(false)
+            }
+            //screen sharing access
+            if (navigator.mediaDevices.getDisplayMedia) {
+                setScreenAvailable(true)
+            } else {
+                setScreenAvailable(false)
+            }
+
+            if (videoAvailable || audioAvailable) {
+                const userMediaStream = await navigator.mediaDevices.getUserMedia({ video: videoAvailable, audio: audioAvailable })
+                console.log("med str:", userMediaStream);
+                if (userMediaStream) {
+                    window.localStream = userMediaStream;
+                    if (localVideoRef.current) {
+                        localVideoRef.current.srcObject = userMediaStream;
+                    }
+                }
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        getPermissions();
+    }, [])
+
+    const getUserMediaSuccess = (stream) => {
+
+    }
+
+    const getUserMedia = () => {
+        if (video && videoAvailable || audio && audioAvailable) {
+            navigator.mediaDevices.getUserMedia({ video: video, audio: audio })
+                .then(getUserMediaSuccess) //getusermediasuccess
+                .then((stream) => { })
+                .catch(e => console.log(e))
+        } else {
+            try {
+                const tracks = localVideoRef.current.srcObject.getTracks()
+                tracks.forEach(track => track.stop());
+            } catch (error) {
+
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (video !== undefined && audio !== undefined) {
+            getUserMedia()
+        }
+    }, [audio, video])
+
+    //const gotMessageFromServer = (fromId,message)=>{}
+
+    const connectToSocketServer = () => {
+        socketRef.current = io.connect(serverUrl, { secure: false });
+        socketRef.current.on("signal", gotMessageFromServer)
+    }
+
+    const getMedia = () => {
+        setVideo(videoAvailable)
+        setAudio(audioAvailable)
+        connectToSocketServer();
+    }
+
     return (
-        <div>
+        <div className='' style={{ backgroundImage: 'url(back2.jpg)' }}>
             {askForUsername === true ? (
-                <>asdjks</>
+                <div>
+                    <input
+                        type="text"
+                        placeholder="Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className="w-64 mt-10 ml-20 px-4 py-2 bg-gray-900 text-gray-200 rounded-lg border-2 border-gray-700 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500"
+                    />
+                    <ShinyButton text='Connect' onClick={connect} />
+                    <div>
+                        <video ref={localVideoRef} autoPlay muted></video>
+                    </div>
+                </div>
             ) : (
                 <></>
             )}
