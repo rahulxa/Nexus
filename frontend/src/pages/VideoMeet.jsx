@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 const serverUrl = "http://localhost:8080";
 
-var connection = {}
+var connections = {}
 const peerConfigConnections = {
     "iceservers": [{ "urls": "stun:stun.l.google.com:19302" }]
 }
@@ -18,7 +18,7 @@ function VideoMeet() {
 
     let [videoAvailable, setVideoAvailable] = useState(true);
     let [audioAvailable, setAudioAvailable] = useState(true);
-    let [video, setVideo] = useState();
+    let [video, setVideo] = useState([]);
     let [audio, setAudio] = useState();
     let [screen, setScreen] = useState();
     let [showModal, setShowModal] = useState();
@@ -32,7 +32,6 @@ function VideoMeet() {
 
     //later
     // if (isChrome === true) {
-
     // }
 
     const getPermissions = async () => {
@@ -104,11 +103,61 @@ function VideoMeet() {
         }
     }, [audio, video])
 
-    //const gotMessageFromServer = (fromId,message)=>{}
+    const gotMessageFromServer = (fromId, message) => { }
+    const addMessage = () => { }
 
     const connectToSocketServer = () => {
         socketRef.current = io.connect(serverUrl, { secure: false });
-        socketRef.current.on("signal", gotMessageFromServer)
+        socketRef.current.on("signal", gotMessageFromServer);
+
+        socketRef.current.on("connect", () => {
+            socketRef.current.emit("join-call", window.location.href)
+            socketIdRef.current = socketRef.current.id
+            socketRef.current.on("chat-message", addMessage)
+            socketRef.on("user-left", (id) => {
+                setVideo((videos) => videos.filter(video => video.socketId !== id));
+            })
+
+            socketRef.current.on("user-joined", (id, clients) => {
+                clients.forEach((socketsListId) => {
+                    connections[socketsListId] = new RTCPeerConnection(peerConfigConnections);
+                    connections[socketsListId].onicecandidate = (event) => {
+                        if (event.candidate !== null) {
+                            socketRef.current.emit("signal", socketsListId, JSON.stringify({ "ice": event.candidate }))
+                        }
+                    }
+                    connections[socketsListId].onaddstream = (event) => {
+                        let videoExists = videoRef.current.find(video => video.socketId === socketsListId);
+
+                        if (videoExists) {
+                            setVideo(videos => {
+                                const updatedVideos = videos.map(video => video.socketId === socketsListId ? { ...video, stream: event.stream } : video)
+                                videoRef.current = updatedVideos;
+                                return updatedVideos;
+                            });
+                        } else {
+                            const newVideo = {
+                                socketId: socketsListId,
+                                stream: event.stream,
+                                autoPlay: true,
+                                playsInLine: true
+                            }
+                            setVideos(videos => {
+                                const updatedVideos = [...videos, newVideo]
+                                videoRef.current = updatedVideos;
+                                return updatedVideos;
+                            });
+                        }
+                    }
+
+                    if (window.localStream !== undefined && window.localStream !== null) {
+                        connections[socketsListId].addStream(wondow.localStream);
+                    } else {
+                       
+                    }
+                })
+            })
+        })
     }
 
     const getMedia = () => {
@@ -140,4 +189,4 @@ function VideoMeet() {
     )
 }
 
-export default VideoMeet    
+export default VideoMeet       
