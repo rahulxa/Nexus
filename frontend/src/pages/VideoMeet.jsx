@@ -108,7 +108,7 @@ function VideoMeet() {
 
     const gotMessageFromServer = (fromId, message) => {
         const signal = JSON.parse(message);
-        if (id !== socketIdRef.current) {
+        if (fromId !== socketIdRef.current) {
             if (signal.sdp) {
                 connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp)
                     .then(() => {
