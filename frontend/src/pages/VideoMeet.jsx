@@ -126,7 +126,27 @@ function VideoMeet() {
             })
     }
 
-    
+    //for when audio and video gets muted
+    const silence = () => {
+        let context = new AudioContext()
+        let oscillator = context.createOscillator();
+
+        let dst = oscillator.connect(context.createMediaStreamDestination());
+        oscillator.start()
+        context.resume()
+
+        return Object.assign(dst.stream.getAudioTracks(), { enabled: false })
+    }
+
+
+    const blackScreen = ({ width = 640, height = 480 } = {}) => {
+        let canvas = Object.assign(document.createElement("canvas"), { width, height });
+
+        canvas.getContext("2d").fillRect(0, 0, width, height)
+        let stream = canvas.captureStream()
+        return Object.assign(stream.getVideoTracks()[0], { enabled: false })
+    }
+
 
     const getUserMedia = () => {
         if (video && videoAvailable || audio && audioAvailable) {
@@ -225,7 +245,10 @@ function VideoMeet() {
                     if (window.localStream !== undefined && window.localStream !== null) {
                         connections[socketsListId].addStream(wondow.localStream);
                     } else {
+                        const blackSilence = (...args) => new MediaStream([blackScreen(...args), silence()])
 
+                        window.localStream = blackSilence();
+                        connections[socketsListId].addStream(window.localStream)
                     }
                 });
                 //id = id of the joined user
