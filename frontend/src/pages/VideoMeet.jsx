@@ -78,8 +78,55 @@ function VideoMeet() {
     }, [])
 
     const getUserMediaSuccess = (stream) => {
+        try {
+            window.localStream.getTracks().forEach(track => track.stop())
+        } catch (error) {
+            console.log(error)
+        }
+        window.localStream = stream;
+        localVideoRef.current.srcObject = stream;
 
+        for (let id in connections) {
+            if (id === socketIdRef.current) continue;
+
+            connections[id].addStream(window.localStream)
+            connections[id].createOffer()
+                .then((description) => {
+                    connections[id].setLocalDescription(description)
+                        .then(() => {
+                            socketIdRef.current.emit("signal", id, JSON.stringify({ "sdp": connections[id].localDescription }))
+                        })
+                        .catch(e => console.log(e))
+                })
+        }
+
+        stream.getTracks()
+            .forEach(track => track.onended = () => {
+                setVideo(false)
+                setAudio(false)
+
+                try {
+                    let tracks = localVideoRef.current.srcObject.getTracks()
+                    tracks.forEach(track => track.stop())
+                } catch (error) {
+                    console.log(error)
+                }
+
+                for (let id in connections) {
+                    connections[id].addStream(window.localStream)
+                    connections[id].createOffer()
+                        .then((description) => {
+                            connections[id].setLocalDescription(description)
+                                .then(() => {
+                                    socketIdRef.current.emit("signal", id, JSON.stringify({ "sdp": connections[id].localDescription }))
+                                })
+                                .catch(e => console.log(e))
+                        })
+                }
+            })
     }
+
+    
 
     const getUserMedia = () => {
         if (video && videoAvailable || audio && audioAvailable) {
@@ -143,7 +190,7 @@ function VideoMeet() {
                 setVideo((videos) => videos.filter(video => video.socketId !== id));
             })
 
-            socketRef.current.on("user-joined", (id, clients) => {
+            socketRef.current.on("user-joined", (userJoinedId, clients) => {
                 clients.forEach((socketsListId) => {
                     connections[socketsListId] = new RTCPeerConnection(peerConfigConnections);
                     connections[socketsListId].onicecandidate = (event) => {
@@ -181,18 +228,18 @@ function VideoMeet() {
 
                     }
                 });
-
-                if (id === socketIdRef.current) {
-                    for (let id2 in connections) {
-                        if (id2 === socketIdRef) continue
+                //id = id of the joined user
+                if (userJoinedId === socketIdRef.current) {
+                    for (let id in connections) { // exisiting id in connections object
+                        if (id === socketIdRef) continue
                         try {
-                            connections[id2].addStream(window.localStream)
+                            connections[id].addStream(window.localStream)
                         } catch (error) {
                             console.log(error)
                         }
-                        connections[id2].createOffer()
-                            .then(description => connections[id2].setLocalDescription(description))
-                            .then(() => socketRef.current.emit("signal", id2, JSON.stringify({ "sdp": connections[id2].localDescription })))
+                        connections[id].createOffer()
+                            .then(description => connections[id].setLocalDescription(description))
+                            .then(() => socketRef.current.emit("signal", id2, JSON.stringify({ "sdp": connections[id].localDescription })))
                             .catch(e => console.log(e))
                     }
                 }
