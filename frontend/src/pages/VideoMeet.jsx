@@ -210,8 +210,8 @@ function VideoMeet() {
             socketIdRef.current = socketRef.current.id
             socketRef.current.on("chat-message", addMessage)
             socketRef.current.on("user-left", (id) => {
-                setVideo((videos) => videos.filter(video => video.socketId !== id));
-            })
+                setVideos(prevVideos => prevVideos.filter(video => video.socketId !== id));
+            });
 
             socketRef.current.on("user-joined", (userJoinedId, clients) => {
                 clients.forEach((socketsListId) => {
@@ -222,28 +222,19 @@ function VideoMeet() {
                         }
                     }
                     connections[socketsListId].onaddstream = (event) => {
-                        let videoExists = videoRef.current.find(video => video.socketId === socketsListId);
-
-                        if (videoExists) {
-                            setVideo(videos => {
-                                const updatedVideos = videos.map(video => video.socketId === socketsListId ? { ...video, stream: event.stream } : video)
-                                videoRef.current = updatedVideos;
-                                return updatedVideos;
-                            });
-                        } else {
-                            const newVideo = {
-                                socketId: socketsListId,
-                                stream: event.stream,
-                                autoPlay: true,
-                                playsInLine: true
+                        setVideos(prevVideos => {
+                            const videoExists = prevVideos.find(v => v.socketId === socketsListId);
+                            if (videoExists) {
+                                return prevVideos.map(v => v.socketId === socketsListId ? { ...v, stream: event.stream } : v);
+                            } else {
+                                return [...prevVideos, {
+                                    socketId: socketsListId,
+                                    stream: event.stream,
+                                    autoPlay: true,
+                                    playsInLine: true
+                                }];
                             }
-                            setVideos(videos => {
-                                const updatedVideos = [...videos, newVideo]
-                                videoRef.current = updatedVideos;
-                                return updatedVideos;
-                            });
-                            console.log("videos:", videos)
-                        }
+                        });
                     }
 
                     if (window.localStream !== undefined && window.localStream !== null) {
@@ -286,6 +277,10 @@ function VideoMeet() {
         getMedia()
     }
 
+    useEffect(() => {
+        console.log("videos updated:", videos);
+    }, [videos]);
+
     return (
         <div className='' style={{ backgroundImage: 'url(back2.jpg)' }}>
             {askForUsername === true ? (
@@ -307,7 +302,16 @@ function VideoMeet() {
                     <video ref={localVideoRef} autoPlay muted></video>
                     {videos.map((video) => (
                         <div key={video.socketId}>
-                            <h2>{video.socketId}</h2>
+                            <h2 className='text-white'>{video.socketId}</h2>
+                            <video
+                                data-socket={video.socketId}
+                                ref={ref => {
+                                    if (ref && video.stream) {
+                                        ref.srcObject = video.stream;
+                                    }
+                                }}
+                                autoPlay
+                            ></video>
                         </div>
                     ))}
                 </>
