@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react'
+import io from "socket.io-client";
 import ShinyButton from '../components/magicui/ShinyButton';
 import { useEffect } from 'react';
 
@@ -94,7 +95,7 @@ function VideoMeet() {
                 .then((description) => {
                     connections[id].setLocalDescription(description)
                         .then(() => {
-                            socketIdRef.current.emit("signal", id, JSON.stringify({ "sdp": connections[id].localDescription }))
+                            socketRef.current.emit("signal", id, JSON.stringify({ "sdp": connections[id].localDescription }))
                         })
                         .catch(e => console.log(e))
                 })
@@ -111,6 +112,10 @@ function VideoMeet() {
                 } catch (error) {
                     console.log(error)
                 }
+
+                const blackSilence = (...args) => new MediaStream([blackScreen(...args), silence()])
+                window.localStream = blackSilence();
+                localVideoRef.current.srcObject = window.localStream
 
                 for (let id in connections) {
                     connections[id].addStream(window.localStream)
@@ -174,29 +179,27 @@ function VideoMeet() {
     const addMessage = () => { }
 
     const gotMessageFromServer = (fromId, message) => {
-        const signal = JSON.parse(message);
+        var signal = JSON.parse(message)
+
         if (fromId !== socketIdRef.current) {
             if (signal.sdp) {
-                connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp)
-                    .then(() => {
-                        if (signal.sdp.type === "offer") {
-                            connections[fromId].createAnswer()
-                                .then((description) => {
-                                    connections[fromId].setLocalDescription(description)
-                                        .then(() => {
-                                            socketRef.current.emit("signal", fromId, JSON.stringify({ "sdp": connections[fromId].localDescription }))
-                                        }).catch(e => console.log(e))
-                                }).catch(e => console.log(e))
-                        }
-                    }).catch(e => console.log(e))
-                )
-                if (signal.ice) {
-                    connections[fromId].addIceCandidate(new RTCIceCandidate(signal.ice))
-                        .catch(e => console.log(e))
-                }
+                connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp)).then(() => {
+                    if (signal.sdp.type === 'offer') {
+                        connections[fromId].createAnswer().then((description) => {
+                            connections[fromId].setLocalDescription(description).then(() => {
+                                socketRef.current.emit('signal', fromId, JSON.stringify({ 'sdp': connections[fromId].localDescription }))
+                            }).catch(e => console.log(e))
+                        }).catch(e => console.log(e))
+                    }
+                }).catch(e => console.log(e))
+            }
+
+            if (signal.ice) {
+                connections[fromId].addIceCandidate(new RTCIceCandidate(signal.ice)).catch(e => console.log(e))
             }
         }
     }
+
 
     const connectToSocketServer = () => {
         socketRef.current = io.connect(serverUrl, { secure: false });
@@ -206,7 +209,7 @@ function VideoMeet() {
             socketRef.current.emit("join-call", window.location.href)
             socketIdRef.current = socketRef.current.id
             socketRef.current.on("chat-message", addMessage)
-            socketRef.on("user-left", (id) => {
+            socketRef.current.on("user-left", (id) => {
                 setVideo((videos) => videos.filter(video => video.socketId !== id));
             })
 
@@ -239,11 +242,12 @@ function VideoMeet() {
                                 videoRef.current = updatedVideos;
                                 return updatedVideos;
                             });
+                            console.log("videos:", videos)
                         }
                     }
 
                     if (window.localStream !== undefined && window.localStream !== null) {
-                        connections[socketsListId].addStream(wondow.localStream);
+                        connections[socketsListId].addStream(window.localStream);
                     } else {
                         const blackSilence = (...args) => new MediaStream([blackScreen(...args), silence()])
 
@@ -262,7 +266,7 @@ function VideoMeet() {
                         }
                         connections[id].createOffer()
                             .then(description => connections[id].setLocalDescription(description))
-                            .then(() => socketRef.current.emit("signal", id2, JSON.stringify({ "sdp": connections[id].localDescription })))
+                            .then(() => socketRef.current.emit("signal", id, JSON.stringify({ "sdp": connections[id].localDescription })))
                             .catch(e => console.log(e))
                     }
                 }
@@ -274,6 +278,12 @@ function VideoMeet() {
         setVideo(videoAvailable)
         setAudio(audioAvailable)
         connectToSocketServer();
+    }
+
+    const connect = () => {
+        console.log("clicked")
+        setAskForUsername(false)
+        getMedia()
     }
 
     return (
@@ -293,7 +303,14 @@ function VideoMeet() {
                     </div>
                 </div>
             ) : (
-                <></>
+                <>
+                    <video ref={localVideoRef} autoPlay muted></video>
+                    {videos.map((video) => (
+                        <div key={video.socketId}>
+                            <h2>{video.socketId}</h2>
+                        </div>
+                    ))}
+                </>
             )}
         </div>
     )
