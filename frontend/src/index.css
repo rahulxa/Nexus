@@ -27,3 +27,8 @@ input:-webkit-autofill:focus {
     -webkit-text-fill-color: #ffffff !important;
     transition: background-color 5000s ease-in-out 0s;
 }
+
+.video-grid {
+    height: calc(100vh - 80px);
+    /* Adjust 80px based on your header height */
+}
