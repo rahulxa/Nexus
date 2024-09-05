@@ -292,21 +292,19 @@ function VideoMeet() {
     }, [videos]);
 
     const getGridClass = (participantCount) => {
-        switch (participantCount) {
-            case 1:
-                return 'single-video';
-            case 2:
-                return 'two-videos';
-            case 3:
-            case 4:
-                return 'four-videos';
-            case 5:
-            case 6:
-                return 'six-videos';
-            default:
-                return 'multi-videos';
+        if (participantCount === 1) {
+            return 'single-video';
+        } else if (participantCount === 2) {
+            return 'two-videos';
+        } else if (participantCount === 3) {
+            return 'three-videos';
+        } else if (participantCount === 4) {
+            return 'four-videos';
+        } else {
+            return 'multi-videos';
         }
     };
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col">
@@ -321,82 +319,82 @@ function VideoMeet() {
                             onChange={(e) => setUsername(e.target.value)}
                             className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500 mb-4"
                         />
-                        <ShinyButton text='Connect' onClick={connect} />
+                        <ShinyButton text="Connect" onClick={connect} />
                     </div>
                 </div>
             ) : (
                 <>
-                    <div className="flex-grow flex justify-center items-center ">
-                        <div className={`video-grid ${getGridClass(videos.length + 1)}`}>
-                            <div className="video-wrapper">
+                    <div className={`video-grid ${getGridClass(videos.length + 1)}`}>
+                        <div className="video-wrapper">
+                            <video
+                                ref={localVideoRef}
+                                autoPlay
+                                muted
+                                className="video-element"
+                            ></video>
+                            <div className="video-label">
+                                <span className="text-white text-sm">You</span>
+                            </div>
+                        </div>
+                        {videos.map((video) => (
+                            <div key={video.socketId} className="video-wrapper">
                                 <video
-                                    ref={localVideoRef}
+                                    data-socket={video.socketId}
+                                    ref={(ref) => {
+                                        if (ref && video.stream) {
+                                            ref.srcObject = video.stream;
+                                        }
+                                    }}
                                     autoPlay
-                                    muted
                                     className="video-element"
                                 ></video>
                                 <div className="video-label">
-                                    <span className="text-white text-sm">You</span>
+                                    <span className="text-white text-sm">{video.socketId}</span>
                                 </div>
                             </div>
-                            {videos.map((video) => (
-                                <div key={video.socketId} className="video-wrapper">
-                                    <video
-                                        data-socket={video.socketId}
-                                        ref={ref => {
-                                            if (ref && video.stream) {
-                                                ref.srcObject = video.stream;
-                                            }
-                                        }}
-                                        autoPlay
-                                        className="video-element"
-                                    ></video>
-                                    <div className="video-label">
-                                        <span className="text-white text-sm">{video.socketId}</span>
-                                    </div>
+                        ))}
+                    </div>
+
+                    <div className="fixed bottom-0 left-0 right-0 flex justify-center p-4">
+                        <div className="video-controls-container">
+                            <div className="video-controls flex space-x-4">
+                                <div className="control-wrapper">
+                                    <button className="control-button" onClick={toggleMute}>
+                                        <i className={`fas ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'}`}></i>
+                                    </button>
+                                    <span className="tooltip">{isMuted ? 'Unmute' : 'Mute'}</span>
                                 </div>
-                            ))}
+                                <div className="control-wrapper">
+                                    <button className="control-button" onClick={toggleVideo}>
+                                        <i className={`fas ${isVideoOff ? 'fa-video-slash' : 'fa-video'}`}></i>
+                                    </button>
+                                    <span className="tooltip">{isVideoOff ? 'Turn on camera' : 'Turn off camera'}</span>
+                                </div>
+                                <div className="control-wrapper">
+                                    <button className="control-button" onClick={toggleScreenShare}>
+                                        <i className={`fas ${isScreenSharing ? 'fa-stop-circle' : 'fa-desktop'}`}></i>
+                                    </button>
+                                    <span className="tooltip">{isScreenSharing ? 'Stop sharing' : 'Share screen'}</span>
+                                </div>
+                                <div className="control-wrapper">
+                                    <button className="control-button">
+                                        <i className="fas fa-comment-alt"></i>
+                                    </button>
+                                    <span className="tooltip">Chat</span>
+                                </div>
+                                <div className="control-wrapper">
+                                    <button className="control-button end-call">
+                                        <i className="fas fa-phone-slash"></i>
+                                    </button>
+                                    <span className="tooltip">Leave call</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </>
             )}
-            {askForUsername === false ? (
-                <div className="video-controls">
-                    <div className="control-wrapper">
-                        <button className="control-button" onClick={toggleMute}>
-                            <i className={`fas ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'}`}></i>
-                        </button>
-                        <span className="tooltip">{isMuted ? "Unmute" : "Mute"}</span>
-                    </div>
-                    <div className="control-wrapper">
-                        <button className="control-button" onClick={toggleVideo}>
-                            <i className={`fas ${isVideoOff ? 'fa-video-slash' : 'fa-video'}`}></i>
-                        </button>
-                        <span className="tooltip">{isVideoOff ? "Turn on camera" : "Turn off camera"}</span>
-                    </div>
-                    <div className="control-wrapper">
-                        <button className="control-button" onClick={toggleScreenShare}>
-                            <i className={`fas ${isScreenSharing ? 'fa-stop-circle' : 'fa-desktop'}`}></i>
-                        </button>
-                        <span className="tooltip">{isScreenSharing ? "Stop sharing" : "Share screen"}</span>
-                    </div>
-                    <div className="control-wrapper">
-                        <button className="control-button">
-                            <i className="fas fa-comment-alt"></i>
-                        </button>
-                        <span className="tooltip">Chat</span>
-                    </div>
-                    <div className="control-wrapper">
-                        <button className="control-button end-call">
-                            <i className="fas fa-phone-slash"></i>
-                        </button>
-                        <span className="tooltip">Leave call</span>
-                    </div>
-                </div>
-            ) :
-                (<></>)
-            }
-        </div >
+        </div>
+
     )
 }
 

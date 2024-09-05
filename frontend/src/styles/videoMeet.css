@@ -1,11 +1,42 @@
 .video-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    gap: 8px;
     width: 100%;
-    max-width: 1200px;
-    gap: 10px;
+    height: calc(100vh - 120px);
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.single-video {
+    grid-template-columns: 1fr;
+    align-items: center;
+    justify-items: center;
+}
+
+.single-video .video-wrapper {
+    width: 100%;
+    max-width: 800px;
+    aspect-ratio: 16 / 9;
+}
+
+.two-videos {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.three-videos {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr;
+}
+
+.four-videos {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+}
+
+.multi-videos {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-auto-rows: 1fr;
+    justify-items: center;
 }
 
 .video-wrapper {
@@ -13,6 +44,7 @@
     background-color: #2d3748;
     border-radius: 8px;
     overflow: hidden;
+    aspect-ratio: 16 / 9;
 }
 
 .video-element {
@@ -28,59 +60,38 @@
     background-color: rgba(0, 0, 0, 0.6);
     padding: 4px 8px;
     border-radius: 4px;
+    color: white;
 }
 
-.single-video .video-wrapper {
-    width: 60%;
-    aspect-ratio: 16 / 9;
-}
-
-.two-videos .video-wrapper {
-    width: calc(50% - 5px);
-    aspect-ratio: 16 / 9;
-}
-
-.four-videos .video-wrapper {
-    width: calc(50% - 5px);
-    aspect-ratio: 4 / 3;
-}
-
-.six-videos .video-wrapper {
-    width: calc(33.333% - 7px);
-    aspect-ratio: 4 / 3;
-}
-
-.multi-videos .video-wrapper {
-    width: calc(25% - 8px);
-    aspect-ratio: 4 / 3;
-}
-
+/* Responsive mobile adjustments */
 @media (max-width: 768px) {
+    .video-grid {
+        grid-template-columns: 1fr !important;
+        height: auto;
+    }
 
-    .single-video .video-wrapper,
-    .two-videos .video-wrapper,
-    .four-videos .video-wrapper,
-    .six-videos .video-wrapper,
-    .multi-videos .video-wrapper {
-        width: 100%;
+    .video-wrapper {
         aspect-ratio: 16 / 9;
+    }
+
+    .three-videos .video-wrapper:nth-child(3),
+    .multi-videos .video-wrapper:nth-child(2n + 3):last-child {
+        width: 100%;
     }
 }
 
 
+/* Video controls CSS remains the same */
+/* Rest of the CSS for controls remains the same */
+
 .video-controls {
-    margin-top: 15px;
-    position: absolute;
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
-    gap: 20px;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 10px 30px;
-    border-radius: 32px;
-    min-width: 360px;
+    align-items: center;
+    /* Aligns vertically in the middle */
     justify-content: center;
+    /* Centers the items horizontally */
+    gap: 16px;
+    /* Optional: Adjusts spacing between controls */
 }
 
 .control-wrapper {
