@@ -28,6 +28,7 @@ function VideoMeet() {
     let [messages, setMessages] = useState([]);
     let [message, setMessage] = useState("");
     let [newMessages, setNewMessages] = useState(3);
+    const [isChatOpen, setIsChatOpen] = useState(false);
     let [username, setUsername] = useState("")
     let [askForUsername, setAskForUsername] = useState(true);
     let [videos, setVideos] = useState([])
@@ -42,6 +43,9 @@ function VideoMeet() {
     const toggleMute = () => setIsMuted(!isMuted);
     const toggleVideo = () => setIsVideoOff(!isVideoOff);
     const toggleScreenShare = () => setIsScreenSharing(!isScreenSharing);
+    const handleToggleChat = () => {
+        setIsChatOpen(!isChatOpen);
+    };
 
     const location = useLocation();
     const slug = location.pathname.split("/").pop();
@@ -321,7 +325,7 @@ function VideoMeet() {
 
 
     return (
-        <div className="h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col">
+        <div className="h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col relative">
             {askForUsername ? (
                 <div className="flex flex-col items-center justify-center flex-grow">
                     <div className="bg-gray-800 p-8 rounded-lg shadow-lg">
@@ -338,8 +342,9 @@ function VideoMeet() {
                 </div>
             ) : (
                 <>
-                    <div className="flex-grow flex items-center justify-center overflow-hidden">
-                        <div className="w-10/12 max-w-6xl h-full">
+                    {/* Video Container */}
+                    <div className={`flex-grow flex items-center justify-center overflow-hidden transition-all duration-300 ${isChatOpen ? 'w-8/12' : 'w-full'}`}>
+                        <div className="w-full max-w-6xl h-full">
                             <div className={`grid gap-4 w-full h-full p-4 ${getGridClass(videos.length + 1)}`}>
                                 <div className={`relative ${videos.length === 0 ? 'col-span-full row-span-full' : ''}`}>
                                     <div className={`relative ${videos.length === 0 ? 'w-4/5 h-4/5 mx-auto' : 'w-full h-full'}`}>
@@ -375,13 +380,14 @@ function VideoMeet() {
                         </div>
                     </div>
 
+                    {/* Bottom Controls */}
                     <div className="flex justify-between p-3">
                         <div>
                             <h3 className='text-gray-300 text-md font-semibold mt-4'>Rahul</h3>
                         </div>
                         <div className="bg-gray-800 rounded-full shadow-lg ml-28">
                             <div className="flex space-x-14 p-1">
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleMute} title={isMuted ? "unmute" : "mute"}>
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleMute} title={isMuted ? "Unmute" : "Mute"}>
                                     <i className={`fas ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'} text-white text-xl`}></i>
                                 </button>
                                 <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleVideo} title={isVideoOff ? "Turn on camera" : "Turn off camera"}>
@@ -390,7 +396,7 @@ function VideoMeet() {
                                 <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleScreenShare} title={isScreenSharing ? "Stop sharing screen" : "Share screen"}>
                                     <i className={`fas ${isScreenSharing ? 'fa-stop-circle' : 'fa-desktop'} text-white text-xl`}></i>
                                 </button>
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300 relative" title="Open chat">
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300 relative" onClick={handleToggleChat} title="Open chat">
                                     <i className="fas fa-comment-alt text-white text-xl"></i>
                                     {newMessages > 0 && (
                                         <span className="absolute -top-1 -right-1 bg-blue-700 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -415,7 +421,6 @@ function VideoMeet() {
                                 onClick={handleCopy}
                             >
                                 <h6 className='text-gray-300 text-md font-semibold mt-4 ml-4 cursor-pointer'>{slug}</h6>
-
                                 {showTooltip && (
                                     <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-0 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out shadow-lg whitespace-nowrap'>
                                         {tooltipText}
@@ -425,6 +430,38 @@ function VideoMeet() {
                             </div>
                         </div>
                     </div>
+
+                    {isChatOpen &&
+                        <div
+                            className={`fixed top-0 right-0 h-full w-0 md:w-0 lg:w-[28%] bg-gray-900 p-4 transition-all duration-300 ease-in-out ${isChatOpen ? 'w-full md:w-[35%]' : 'w-0'}`}
+                        >
+                            <div className="flex flex-col h-full">
+                                <div className="text-white font-bold text-lg mb-4">Chat</div>
+                                <div className="flex-grow overflow-y-auto mb-4">
+                                    {/* {chatMessages.map((msg, index) => (
+                                        <div key={index} className="bg-gray-800 text-white p-2 rounded mb-2">
+                                            <strong>{msg.sender}: </strong>{msg.text}
+                                        </div>
+                                    ))} */}
+                                </div>
+                                <div className="flex">
+                                    <input
+                                        type="text"
+                                        placeholder="Type a message..."
+                                        // value={newMessage}
+                                        // onChange={(e) => setNewMessage(e.target.value)}
+                                        className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring focus:ring-cyan-500"
+                                    />
+                                    <button
+                                        // onClick={handleSendMessage}
+                                        className="bg-cyan-500 text-white px-4 py-2 ml-2 rounded"
+                                    >
+                                        Send
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </>
             )}
         </div>
