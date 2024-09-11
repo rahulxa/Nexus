@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react'
 import io from "socket.io-client";
 import ShinyButton from '../components/magicui/ShinyButton';
 import { useEffect } from 'react';
+import { useLocation } from "react-router-dom"
 
 const serverUrl = "http://localhost:8080";
 
@@ -26,22 +27,40 @@ function VideoMeet() {
     let [screenAvailable, setScreenAvailable] = useState();
     let [messages, setMessages] = useState([]);
     let [message, setMessage] = useState("");
-    let [newMessages, setNewMessages] = useState(0);
+    let [newMessages, setNewMessages] = useState(3);
     let [username, setUsername] = useState("")
     let [askForUsername, setAskForUsername] = useState(true);
     let [videos, setVideos] = useState([])
-
-    //later
-    // if (isChrome === true) {
-    // }
+    const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }));
 
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOff, setIsVideoOff] = useState(false);
     const [isScreenSharing, setIsScreenSharing] = useState(false);
+    const [showTooltip, setShowTooltip] = useState(false);
+    const [tooltipText, setTooltipText] = useState('Copy Meeting ID');
 
     const toggleMute = () => setIsMuted(!isMuted);
     const toggleVideo = () => setIsVideoOff(!isVideoOff);
     const toggleScreenShare = () => setIsScreenSharing(!isScreenSharing);
+
+    const location = useLocation();
+    const slug = location.pathname.split("/").pop();
+
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(slug);
+        setTooltipText('Copied!');
+        setTimeout(() => setTooltipText('Copy Meeting ID'), 2000); // Reset the tooltip text after 2 seconds
+    };
+
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }));
+        }, 1000);
+
+        return () => clearInterval(interval); // Cleanup interval on component unmount
+    }, []);
 
 
     const getPermissions = async () => {
@@ -356,24 +375,53 @@ function VideoMeet() {
                         </div>
                     </div>
 
-                    <div className="flex justify-center p-3">
-                        <div className="bg-gray-800 rounded-full shadow-lg">
-                            <div className="flex space-x-14 p-4">
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleMute}>
-                                    <i className={`fas ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'} text-white text-l`}></i>
+                    <div className="flex justify-between p-3">
+                        <div>
+                            <h3 className='text-gray-300 text-md font-semibold mt-4'>Rahul</h3>
+                        </div>
+                        <div className="bg-gray-800 rounded-full shadow-lg ml-28">
+                            <div className="flex space-x-14 p-1">
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleMute} title={isMuted ? "unmute" : "mute"}>
+                                    <i className={`fas ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'} text-white text-xl`}></i>
                                 </button>
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleVideo}>
-                                    <i className={`fas ${isVideoOff ? 'fa-video-slash' : 'fa-video'} text-white text-l`}></i>
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleVideo} title={isVideoOff ? "Turn on camera" : "Turn off camera"}>
+                                    <i className={`fas ${isVideoOff ? 'fa-video-slash' : 'fa-video'} text-white text-xl`}></i>
                                 </button>
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleScreenShare}>
-                                    <i className={`fas ${isScreenSharing ? 'fa-stop-circle' : 'fa-desktop'} text-white text-l`}></i>
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleScreenShare} title={isScreenSharing ? "Stop sharing screen" : "Share screen"}>
+                                    <i className={`fas ${isScreenSharing ? 'fa-stop-circle' : 'fa-desktop'} text-white text-xl`}></i>
                                 </button>
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300">
-                                    <i className="fas fa-comment-alt text-white text-l"></i>
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300 relative" title="Open chat">
+                                    <i className="fas fa-comment-alt text-white text-xl"></i>
+                                    {newMessages > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-blue-700 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                            {newMessages > 99 ? '99+' : newMessages}
+                                        </span>
+                                    )}
                                 </button>
-                                <button className="p-3 rounded-full bg-red-600 hover:bg-red-700 transition-colors duration-300">
-                                    <i className="fas fa-phone-slash text-white text-l"></i>
+                                <button className="p-2 rounded-full bg-red-800 hover:bg-red-900 transition-colors duration-300" title='End call'>
+                                    <div className="w-8 h-8 flex items-center justify-center">
+                                        <i className="fas fa-phone-alt text-white text-xl transform rotate-135"></i>
+                                    </div>
                                 </button>
+                            </div>
+                        </div>
+                        <div className='flex'>
+                            <h6 className='text-gray-300 text-md font-semibold mt-4'>{currentTime.toUpperCase()}</h6>
+                            <p className='text-gray-300 mt-3 text-xl ml-4'>|</p>
+                            <div
+                                className="relative group"
+                                onMouseEnter={() => setShowTooltip(true)}
+                                onMouseLeave={() => setShowTooltip(false)}
+                                onClick={handleCopy}
+                            >
+                                <h6 className='text-gray-300 text-md font-semibold mt-4 ml-4 cursor-pointer'>{slug}</h6>
+
+                                {showTooltip && (
+                                    <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-0 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out shadow-lg whitespace-nowrap'>
+                                        {tooltipText}
+                                        <div className='absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-800'></div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
