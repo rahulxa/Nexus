@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react'
 import io from "socket.io-client";
 import ShinyButton from '../components/magicui/ShinyButton';
 import { useEffect } from 'react';
-// import '../styles/videoMeet.css';
 
 const serverUrl = "http://localhost:8080";
 
