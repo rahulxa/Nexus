@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react'
 import io from "socket.io-client";
 import ShinyButton from '../components/magicui/ShinyButton';
 import { useEffect } from 'react';
-import '../styles/videoMeet.css';
+// import '../styles/videoMeet.css';
 
 const serverUrl = "http://localhost:8080";
 
@@ -241,7 +241,8 @@ function VideoMeet() {
                                     socketId: socketsListId,
                                     stream: event.stream,
                                     autoPlay: true,
-                                    playsInLine: true
+                                    playsInLine: true,
+                                    username: username
                                 }];
                             }
                         });
@@ -288,27 +289,22 @@ function VideoMeet() {
     }
 
     useEffect(() => {
-        console.log("videos updated:", videos);
-    }, [videos]);
+        console.log("videos", videos)
+    }, [videos])
 
-    const getGridClass = (participantCount) => {
-        if (participantCount === 1) {
-            return 'single-video';
-        } else if (participantCount === 2) {
-            return 'two-videos';
-        } else if (participantCount === 3) {
-            return 'three-videos';
-        } else if (participantCount === 4) {
-            return 'four-videos';
-        } else {
-            return 'multi-videos';
-        }
+
+    const getGridClass = (count) => {
+        if (count <= 1) return 'grid-cols-1';
+        if (count === 2) return 'grid-cols-2';
+        if (count <= 4) return 'grid-cols-2 grid-rows-2';
+        if (count <= 9) return 'grid-cols-3 grid-rows-3';
+        return 'grid-cols-4 grid-rows-4';
     };
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col">
-            {askForUsername === true ? (
+        <div className="h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col">
+            {askForUsername ? (
                 <div className="flex flex-col items-center justify-center flex-grow">
                     <div className="bg-gray-800 p-8 rounded-lg shadow-lg">
                         <h2 className="text-2xl font-bold text-white mb-4">Join Video Call</h2>
@@ -324,78 +320,68 @@ function VideoMeet() {
                 </div>
             ) : (
                 <>
-                    <div className={`video-grid ${getGridClass(videos.length + 1)}`}>
-                        <div className="video-wrapper">
-                            <video
-                                ref={localVideoRef}
-                                autoPlay
-                                muted
-                                className="video-element"
-                            ></video>
-                            <div className="video-label">
-                                <span className="text-white text-sm">You</span>
+                    <div className="flex-grow flex items-center justify-center overflow-hidden">
+                        <div className="w-10/12 max-w-6xl h-full">
+                            <div className={`grid gap-4 w-full h-full p-4 ${getGridClass(videos.length + 1)}`}>
+                                <div className={`relative ${videos.length === 0 ? 'col-span-full row-span-full' : ''}`}>
+                                    <div className={`relative ${videos.length === 0 ? 'w-4/5 h-4/5 mx-auto' : 'w-full h-full'}`}>
+                                        <video
+                                            ref={localVideoRef}
+                                            autoPlay
+                                            muted
+                                            className="w-full h-full object-cover rounded-lg"
+                                        ></video>
+                                        <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded">
+                                            <span className="text-white text-sm">You</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {videos.map((video) => (
+                                    <div key={video.socketId} className="relative">
+                                        <video
+                                            data-socket={video.socketId}
+                                            ref={(ref) => {
+                                                if (ref && video.stream) {
+                                                    ref.srcObject = video.stream;
+                                                }
+                                            }}
+                                            autoPlay
+                                            className="w-full h-full object-cover rounded-lg"
+                                        ></video>
+                                        <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded">
+                                            <span className="text-white text-sm">{video.username}</span>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-                        {videos.map((video) => (
-                            <div key={video.socketId} className="video-wrapper">
-                                <video
-                                    data-socket={video.socketId}
-                                    ref={(ref) => {
-                                        if (ref && video.stream) {
-                                            ref.srcObject = video.stream;
-                                        }
-                                    }}
-                                    autoPlay
-                                    className="video-element"
-                                ></video>
-                                <div className="video-label">
-                                    <span className="text-white text-sm">{video.socketId}</span>
-                                </div>
-                            </div>
-                        ))}
                     </div>
 
-                    <div className="fixed bottom-0 left-0 right-0 flex justify-center p-4">
-                        <div className="video-controls-container">
-                            <div className="video-controls flex space-x-4">
-                                <div className="control-wrapper">
-                                    <button className="control-button" onClick={toggleMute}>
-                                        <i className={`fas ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'}`}></i>
-                                    </button>
-                                    <span className="tooltip">{isMuted ? 'Unmute' : 'Mute'}</span>
-                                </div>
-                                <div className="control-wrapper">
-                                    <button className="control-button" onClick={toggleVideo}>
-                                        <i className={`fas ${isVideoOff ? 'fa-video-slash' : 'fa-video'}`}></i>
-                                    </button>
-                                    <span className="tooltip">{isVideoOff ? 'Turn on camera' : 'Turn off camera'}</span>
-                                </div>
-                                <div className="control-wrapper">
-                                    <button className="control-button" onClick={toggleScreenShare}>
-                                        <i className={`fas ${isScreenSharing ? 'fa-stop-circle' : 'fa-desktop'}`}></i>
-                                    </button>
-                                    <span className="tooltip">{isScreenSharing ? 'Stop sharing' : 'Share screen'}</span>
-                                </div>
-                                <div className="control-wrapper">
-                                    <button className="control-button">
-                                        <i className="fas fa-comment-alt"></i>
-                                    </button>
-                                    <span className="tooltip">Chat</span>
-                                </div>
-                                <div className="control-wrapper">
-                                    <button className="control-button end-call">
-                                        <i className="fas fa-phone-slash"></i>
-                                    </button>
-                                    <span className="tooltip">Leave call</span>
-                                </div>
+                    <div className="flex justify-center p-3">
+                        <div className="bg-gray-800 rounded-full shadow-lg">
+                            <div className="flex space-x-14 p-4">
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleMute}>
+                                    <i className={`fas ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'} text-white text-l`}></i>
+                                </button>
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleVideo}>
+                                    <i className={`fas ${isVideoOff ? 'fa-video-slash' : 'fa-video'} text-white text-l`}></i>
+                                </button>
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleScreenShare}>
+                                    <i className={`fas ${isScreenSharing ? 'fa-stop-circle' : 'fa-desktop'} text-white text-l`}></i>
+                                </button>
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300">
+                                    <i className="fas fa-comment-alt text-white text-l"></i>
+                                </button>
+                                <button className="p-3 rounded-full bg-red-600 hover:bg-red-700 transition-colors duration-300">
+                                    <i className="fas fa-phone-slash text-white text-l"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </>
             )}
         </div>
-
-    )
+    );
 }
 
 export default VideoMeet       
