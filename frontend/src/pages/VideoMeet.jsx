@@ -67,6 +67,18 @@ function VideoMeet() {
     }, []);
 
 
+    const getDisplayMedia = () => {
+        if (screen) {
+            if (navigator.mediaDevices.getDisplayMedia) {
+                navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+                    .then(getDisplayMediaSuccess)
+                    .then((stream) => { })
+                    .catch((e) => console.log(e))
+            }
+        }
+    }
+
+
     const getPermissions = async () => {
         try {
             //allowing video access
@@ -319,9 +331,70 @@ function VideoMeet() {
         setAudio(!audio)
     }
 
-    // useEffect(() => {
-    //     console.log("videos", videos)
-    // }, [videos])
+    const getDisplayMediaSuccess = (stream) => {
+        try {
+            window.localStream.getTracks()
+                .forEach(track => track.stop())
+        } catch (e) {
+            console.log(e)
+        }
+        window.localStream = stream;
+        localVideoRef.current.srcObject = stream;
+
+        for (let id in connections) {
+            if (id === socketIdRef.current) continue;
+            connections[id].addStream(window.localStream);
+            connections[id].createOffer().then((description) => {
+                connections[id].setLocalDescription(description)
+                    .then(() => {
+                        socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }))
+                    })
+                    .catch(e => console.log(e))
+            })
+        }
+
+        stream.getTracks()
+            .forEach(track => track.onended = () => {
+                setScreen(false);
+
+                try {
+                    let tracks = localVideoRef.current.srcObject.getTracks()
+                    tracks.forEach(track => track.stop())
+                } catch (error) {
+                    console.log(error)
+                }
+
+                const blackSilence = (...args) => new MediaStream([blackScreen(...args), silence()])
+                window.localStream = blackSilence();
+                localVideoRef.current.srcObject = window.localStream
+
+                getUserMedia();
+            });
+    }
+
+
+
+    useEffect(() => {
+        if (screen !== undefined) {
+            getDisplayMedia();
+        }
+    }, [screen])
+
+
+    const handleScreenSharing = () => {
+        if (screen) {
+            // Stop screen sharing
+            let tracks = window.localStream.getTracks();
+            tracks.forEach(track => track.stop()); // Stop the screen share tracks
+
+            // Switch back to regular camera stream
+            getUserMedia();
+        } else {
+            // Start screen sharing
+            getDisplayMedia();
+        }
+        setScreen(!screen);
+    };
 
 
     const getGridClass = (count) => {
@@ -414,7 +487,13 @@ function VideoMeet() {
                                 >
                                     <i className={`fas ${isVideoOff ? 'fa-video-slash' : 'fa-video'} text-white text-xl`}></i>
                                 </button>
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleScreenShare} title={isScreenSharing ? "Stop sharing screen" : "Share screen"}>
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300"
+                                    onClick={() => {
+                                        toggleScreenShare();
+                                        handleScreenSharing();
+                                    }}
+                                    title={isScreenSharing ? "Stop sharing screen" : "Share screen"}
+                                >
                                     <i className={`fas ${isScreenSharing ? 'fa-stop-circle' : 'fa-desktop'} text-white text-xl`}></i>
                                 </button>
                                 <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300 relative" onClick={handleToggleChat} title="Open chat">
