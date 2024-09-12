@@ -347,7 +347,7 @@ function VideoMeet() {
                         <div className="w-full max-w-6xl h-full">
                             <div className={`grid gap-4 w-full h-full p-4 ${getGridClass(videos.length + 1)}`}>
                                 <div className={`relative ${videos.length === 0 ? 'col-span-full row-span-full' : ''}`}>
-                                    <div className={`relative ${videos.length === 0 ? 'w-4/5 h-4/5 mx-auto' : 'w-full h-full'}`}>
+                                    <div className={`relative ${videos.length === 0 ? 'w-3/5 h-4/5 mx-auto' : 'w-full h-full'}`}>
                                         <video
                                             ref={localVideoRef}
                                             autoPlay
