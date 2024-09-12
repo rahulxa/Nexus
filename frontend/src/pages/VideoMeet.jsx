@@ -294,8 +294,8 @@ function VideoMeet() {
                             .catch(e => console.log(e))
                     }
                 }
-            })
-        })
+            });
+        });
     }
 
     const getMedia = () => {
@@ -381,7 +381,7 @@ function VideoMeet() {
                     </div>
 
                     {/* Bottom Controls */}
-                    <div className="flex justify-between p-3">
+                    <div className={`flex justify-between p-3 ${isChatOpen ? 'w-8/12' : 'w-full'}`}>
                         <div>
                             <h3 className='text-gray-300 text-md font-semibold mt-4'>Rahul</h3>
                         </div>
@@ -431,12 +431,22 @@ function VideoMeet() {
                         </div>
                     </div>
 
+                    {/* chat box */}
                     {isChatOpen &&
                         <div
-                            className={`fixed top-0 right-0 h-full w-0 md:w-0 lg:w-[28%] bg-gray-900 p-4 transition-all duration-300 ease-in-out ${isChatOpen ? 'w-full md:w-[35%]' : 'w-0'}`}
+                            className={`fixed mb-10 rounded-lg top-0 right-0 h-[95%] w-0 md:w-0 lg:w-[28%] bg-gray-900 p-4 transition-all duration-300 ease-in-out ${isChatOpen ? 'w-full md:w-[35%]' : 'w-0'}`}
                         >
                             <div className="flex flex-col h-full">
-                                <div className="text-white font-bold text-lg mb-4">Chat</div>
+                                <div className='flex flex-row justify-between items-center'>
+                                    <div className="text-gray-300 font-semibold text-lg">In-call messages</div>
+                                    <button
+                                        onClick={handleToggleChat}
+                                        className="text-gray-600 hover:bg-gray-300 transition-colors duration-300 p-2 rounded-full flex items-center justify-center text-xl mt-2"
+                                        title="Close"
+                                    >
+                                        <i className="fas fa-times"></i> {/* Cross icon */}
+                                    </button>
+                                </div>
                                 <div className="flex-grow overflow-y-auto mb-4">
                                     {/* {chatMessages.map((msg, index) => (
                                         <div key={index} className="bg-gray-800 text-white p-2 rounded mb-2">
@@ -447,24 +457,26 @@ function VideoMeet() {
                                 <div className="flex">
                                     <input
                                         type="text"
-                                        placeholder="Type a message..."
+                                        placeholder="Send a message..."
                                         // value={newMessage}
                                         // onChange={(e) => setNewMessage(e.target.value)}
-                                        className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring focus:ring-cyan-500"
+                                        className="w-full text-sm p-3 rounded-full bg-gray-700 text-white focus:outline-none "
                                     />
                                     <button
                                         // onClick={handleSendMessage}
-                                        className="bg-cyan-500 text-white px-4 py-2 ml-2 rounded"
+                                        className="bg-cyan-500 text-white p-3 ml-2 rounded-full flex items-center justify-center"
+                                        title='send'
                                     >
-                                        Send
+                                        <i className="fas fa-paper-plane"></i> {/* Send icon */}
                                     </button>
                                 </div>
                             </div>
                         </div>
                     }
                 </>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }
 
