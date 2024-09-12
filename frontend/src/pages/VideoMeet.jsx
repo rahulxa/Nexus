@@ -310,9 +310,18 @@ function VideoMeet() {
         getMedia()
     }
 
-    useEffect(() => {
-        console.log("videos", videos)
-    }, [videos])
+
+    const handleTurnOffVideo = () => {
+        setVideo(!video)
+    }
+
+    const handleTurnOfAudio = () => {
+        setAudio(!audio)
+    }
+
+    // useEffect(() => {
+    //     console.log("videos", videos)
+    // }, [videos])
 
 
     const getGridClass = (count) => {
@@ -387,10 +396,22 @@ function VideoMeet() {
                         </div>
                         <div className="bg-gray-800 rounded-full shadow-lg ml-28">
                             <div className="flex space-x-14 p-1">
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleMute} title={isMuted ? "Unmute" : "Mute"}>
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300"
+                                    onClick={() => {
+                                        toggleMute();
+                                        handleTurnOfAudio();
+                                    }}
+                                    title={isMuted ? "Unmute" : "Mute"}
+                                >
                                     <i className={`fas ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'} text-white text-xl`}></i>
                                 </button>
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleVideo} title={isVideoOff ? "Turn on camera" : "Turn off camera"}>
+                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300"
+                                    onClick={() => {
+                                        toggleVideo();
+                                        handleTurnOffVideo()
+                                    }}
+                                    title={isVideoOff ? "Turn on camera" : "Turn off camera"}
+                                >
                                     <i className={`fas ${isVideoOff ? 'fa-video-slash' : 'fa-video'} text-white text-xl`}></i>
                                 </button>
                                 <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300" onClick={toggleScreenShare} title={isScreenSharing ? "Stop sharing screen" : "Share screen"}>
