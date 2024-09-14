@@ -27,7 +27,7 @@ function VideoMeet() {
     let [screenAvailable, setScreenAvailable] = useState();
     let [messages, setMessages] = useState([]);
     let [message, setMessage] = useState("");
-    let [newMessages, setNewMessages] = useState(3);
+    let [newMessages, setNewMessages] = useState(0);
     const [isChatOpen, setIsChatOpen] = useState(false);
     let [username, setUsername] = useState("")
     let [askForUsername, setAskForUsername] = useState(true);
@@ -43,9 +43,7 @@ function VideoMeet() {
     const toggleMute = () => setIsMuted(!isMuted);
     const toggleVideo = () => setIsVideoOff(!isVideoOff);
     const toggleScreenShare = () => setIsScreenSharing(!isScreenSharing);
-    const handleToggleChat = () => {
-        setIsChatOpen(!isChatOpen);
-    };
+
 
     const location = useLocation();
     const slug = location.pathname.split("/").pop();
@@ -219,8 +217,6 @@ function VideoMeet() {
         }
     }, [audio, video])
 
-
-    const addMessage = () => { }
 
     const gotMessageFromServer = (fromId, message) => {
         var signal = JSON.parse(message)
@@ -397,6 +393,38 @@ function VideoMeet() {
     };
 
 
+    const addMessage = (data, sender, socketIdSender) => {
+        setMessages((prevMessages) => [
+            ...prevMessages, { sender: sender, data: data }
+        ]);
+        if (socketIdSender !== socketIdRef.current) {
+            setNewMessages(prevNewMessages => prevNewMessages + 1)
+        }
+    }
+
+
+    const handleSendMessage = () => {
+        socketRef.current.emit('chat-message', message, username)
+        setMessage("");
+    }
+
+
+    const handleToggleChat = () => {
+        setIsChatOpen(!isChatOpen);
+        setNewMessages(0);
+    };
+
+    let handleEndCall = () => {
+        try {
+            let tracks = localVideoRef.current.srcObject.getTracks()
+            tracks.forEach(track => track.stop())
+        } catch (e) {
+            console.log(e)
+        }
+        window.location.href = "/"
+    }
+
+
     const getGridClass = (count) => {
         if (count <= 1) return 'grid-cols-1';
         if (count === 2) return 'grid-cols-2';
@@ -504,7 +532,10 @@ function VideoMeet() {
                                         </span>
                                     )}
                                 </button>
-                                <button className="p-2 rounded-full bg-red-800 hover:bg-red-900 transition-colors duration-300" title='End call'>
+                                <button className="p-2 rounded-full bg-red-800 hover:bg-red-900 transition-colors duration-300"
+                                    title='End call'
+                                    onClick={handleEndCall}
+                                >
                                     <div className="w-8 h-8 flex items-center justify-center">
                                         <i className="fas fa-phone-alt text-white text-xl transform rotate-135"></i>
                                     </div>
@@ -534,40 +565,59 @@ function VideoMeet() {
                     {/* chat box */}
                     {isChatOpen &&
                         <div
-                            className={`fixed mb-10 rounded-lg top-0 right-0 h-[95%] w-0 md:w-0 lg:w-[28%] bg-gray-900 p-4 transition-all duration-300 ease-in-out ${isChatOpen ? 'w-full md:w-[35%]' : 'w-0'}`}
+                            className={`fixed mb-10 rounded-lg top-0 right-0 h-[95%] w-0 md:w-0 lg:w-[28%] bg-gray-900 p-6 shadow-lg transition-all duration-300 ease-in-out ${isChatOpen ? 'w-full md:w-[35%]' : 'w-0'}`}
                         >
                             <div className="flex flex-col h-full">
-                                <div className='flex flex-row justify-between items-center'>
-                                    <div className="text-gray-300 font-semibold text-lg">In-call messages</div>
+                                {/* Header */}
+                                <div className='flex justify-between items-center mb-4 border-b border-gray-700 pb-2'>
+                                    <div className="text-gray-200 font-semibold text-lg">
+                                        In-call Messages
+                                    </div>
                                     <button
                                         onClick={handleToggleChat}
-                                        className="text-gray-600 hover:bg-gray-300 transition-colors duration-300 p-2 rounded-full flex items-center justify-center text-xl mt-2"
+                                        className="text-gray-400 hover:text-white transition-colors duration-300 p-2 rounded-full flex items-center justify-center text-2xl"
                                         title="Close"
                                     >
-                                        <i className="fas fa-times"></i> {/* Cross icon */}
+                                        <i className="fas fa-times"></i>
                                     </button>
                                 </div>
-                                <div className="flex-grow overflow-y-auto mb-4">
-                                    {/* {chatMessages.map((msg, index) => (
-                                        <div key={index} className="bg-gray-800 text-white p-2 rounded mb-2">
-                                            <strong>{msg.sender}: </strong>{msg.text}
+                                {/* Messages Section */}
+                                <div className="flex-grow text-white overflow-y-auto mb-4 space-y-3">
+                                    {messages.length !== 0 ? (
+                                        messages.map((item, index) => (
+                                            <div
+                                                key={index}
+                                                className="bg-gray-800 p-3 rounded-lg shadow-sm"
+                                                style={{
+                                                    animation: `fadeInUp 0.4s ease ${index * 0.1}s forwards`,
+                                                    opacity: 0
+                                                }}
+                                            >
+                                                <p className="text-cyan-400 font-semibold text-sm">{item.sender}</p>
+                                                <p className="text-gray-300 text-sm mt-1">{item.data}</p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="flex items-center justify-center h-full text-gray-500">
+                                            <p>No messages yet!</p>
                                         </div>
-                                    ))} */}
+                                    )}
                                 </div>
-                                <div className="flex">
+                                {/* Input Section */}
+                                <div className="flex items-center">
                                     <input
                                         type="text"
-                                        placeholder="Send a message..."
-                                        // value={newMessage}
-                                        // onChange={(e) => setNewMessage(e.target.value)}
-                                        className="w-full text-sm p-3 rounded-full bg-gray-700 text-white focus:outline-none "
+                                        placeholder="Type a message..."
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        className="w-full text-sm p-3 rounded-full bg-gray-800 text-gray-300 border border-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                                     />
                                     <button
-                                        // onClick={handleSendMessage}
-                                        className="bg-cyan-500 text-white p-3 ml-2 rounded-full flex items-center justify-center"
-                                        title='send'
+                                        onClick={handleSendMessage}
+                                        className="bg-cyan-500 hover:bg-cyan-600 text-white p-3 ml-3 rounded-full flex items-center justify-center transition-colors duration-300 shadow-md"
+                                        title='Send'
                                     >
-                                        <i className="fas fa-paper-plane"></i> {/* Send icon */}
+                                        <i className="fas fa-paper-plane"></i>
                                     </button>
                                 </div>
                             </div>
