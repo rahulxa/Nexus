@@ -378,6 +378,7 @@ function VideoMeet() {
         if (screen !== undefined) {
             getDisplayMedia();
         }
+        console.log("hello")
     }, [screen])
 
 
