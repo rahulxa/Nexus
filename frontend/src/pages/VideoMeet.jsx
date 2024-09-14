@@ -610,6 +610,11 @@ function VideoMeet() {
                                         placeholder="Type a message..."
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                handleSendMessage();
+                                            }
+                                        }}
                                         className="w-full text-sm p-3 rounded-full bg-gray-800 text-gray-300 border border-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                                     />
                                     <button
@@ -623,8 +628,7 @@ function VideoMeet() {
                             </div>
                         </div>
                     }
-                </>
-            )
+                </>)
             }
         </div >
     );
