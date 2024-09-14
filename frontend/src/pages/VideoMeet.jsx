@@ -17,6 +17,7 @@ function VideoMeet() {
     let socketIdRef = useRef()
     let localVideoRef = useRef();
     const videoRef = useRef([])
+    const chatMessageRef = useRef(null);
 
     let [videoAvailable, setVideoAvailable] = useState(true);
     let [audioAvailable, setAudioAvailable] = useState(true);
@@ -414,6 +415,12 @@ function VideoMeet() {
         setNewMessages(0);
     };
 
+    const scrollToChatBottom = () => {
+        chatMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+
+    useEffect(scrollToChatBottom, [messages]);
+
     let handleEndCall = () => {
         try {
             let tracks = localVideoRef.current.srcObject.getTracks()
@@ -432,6 +439,8 @@ function VideoMeet() {
         if (count <= 9) return 'grid-cols-3 grid-rows-3';
         return 'grid-cols-4 grid-rows-4';
     };
+
+
 
 
     return (
@@ -582,7 +591,9 @@ function VideoMeet() {
                                     </button>
                                 </div>
                                 {/* Messages Section */}
-                                <div className="flex-grow text-white overflow-y-auto mb-4 space-y-3">
+                                <div className="flex-grow text-white overflow-y-auto mb-4 space-y-3"
+                                // ref={}
+                                >
                                     {messages.length !== 0 ? (
                                         messages.map((item, index) => (
                                             <div
@@ -602,6 +613,7 @@ function VideoMeet() {
                                             <p>No messages yet!</p>
                                         </div>
                                     )}
+                                    <div ref={chatMessageRef} />
                                 </div>
                                 {/* Input Section */}
                                 <div className="flex items-center">
