@@ -63,19 +63,23 @@ const Authentication = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-cover bg-center bg-fixed relative"
-            style={{ backgroundImage: 'url(back2.jpg)' }}>
-            <div className="absolute inset-0 bg-black opacity-50 backdrop-filter backdrop-blur-md"></div>
-            <div className="w-96 bg-gray-900 bg-opacity-80 rounded-lg p-8 shadow-lg border border-cyan-400 relative z-10 mt-20">
+        <div className="h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col items-center justify-center relative">
+            {/* Optional Decorative Background */}
+            <div className="absolute top-0 left-0 w-64 h-64 bg-cyan-700 rounded-full opacity-20 filter blur-3xl"></div>
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-500 rounded-full opacity-20 filter blur-3xl"></div>
+
+            {/* Login/Signup Box */}
+            <div className="w-96 mt-12 bg-gray-900 bg-opacity-80 rounded-lg p-8 shadow-lg border border-cyan-400 relative z-10">
                 <GradualSpacing
                     className="text-3xl font-bold text-center mb-6 text-white"
-                    key={signup ? 'signup' : 'login'} // Add this line
+                    key={signup ? 'signup' : 'login'}
                 >
                     <span className="mr-1">{signup ? 'Join' : 'Login to'}</span>
                     <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-400">NEXUS</span>
                     {signup && <span className="ml-1">Today</span>}
                 </GradualSpacing>
 
+                {/* Message Notification */}
                 {message.content && (
                     <div className={`
                     mb-4 p-3 rounded-md border 
@@ -96,6 +100,7 @@ const Authentication = () => {
                     </div>
                 )}
 
+                {/* Form Fields */}
                 <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                     <div>
                         <input
@@ -144,6 +149,8 @@ const Authentication = () => {
                         {signup ? "Register" : "Login"}
                     </button>
                 </form>
+
+                {/* Toggle Signup/Login */}
                 <div className="mt-6 text-center">
                     <span className="text-gray-300">{signup ? "Already have an account?" : "Don't have an account?"}</span>
                     <button className='text-cyan-400 hover:underline ml-1' onClick={toggleLoginSignup}>
@@ -151,7 +158,7 @@ const Authentication = () => {
                     </button>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 

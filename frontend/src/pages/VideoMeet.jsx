@@ -2,7 +2,9 @@ import React, { useRef, useState } from 'react'
 import io from "socket.io-client";
 import ShinyButton from '../components/magicui/ShinyButton';
 import { useEffect } from 'react';
-import { useLocation } from "react-router-dom"
+import { useLocation, Navigate, useParams } from "react-router-dom"
+import NavBar from '../components/NavBar';
+import { v4 as uuidv4 } from 'uuid';
 
 const serverUrl = "http://localhost:8080";
 
@@ -24,7 +26,6 @@ function VideoMeet() {
     let [video, setVideo] = useState([]);
     let [audio, setAudio] = useState();
     let [screen, setScreen] = useState();
-    let [showModal, setShowModal] = useState();
     let [screenAvailable, setScreenAvailable] = useState();
     let [messages, setMessages] = useState([]);
     let [message, setMessage] = useState("");
@@ -314,11 +315,11 @@ function VideoMeet() {
     }
 
     const connect = () => {
-        console.log("clicked")
         setAskForUsername(false)
+        const meetingId = uuidv4();
+        window.location.href = `/${meetingId}`;
         getMedia()
     }
-
 
     const handleTurnOffVideo = () => {
         setVideo(!video)
@@ -441,24 +442,64 @@ function VideoMeet() {
     };
 
 
-
+    const [isJoining, setIsjoining] = useState(true)
 
     return (
         <div className="h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col relative">
             {askForUsername ? (
-                <div className="flex flex-col items-center justify-center flex-grow">
-                    <div className="bg-gray-800 p-8 rounded-lg shadow-lg">
-                        <h2 className="text-2xl font-bold text-white mb-4">Join Video Call</h2>
-                        <input
-                            type="text"
-                            placeholder="Enter your username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500 mb-4"
-                        />
-                        <ShinyButton text="Connect" onClick={connect} />
+                <>
+                    <NavBar />
+                    <div className="flex flex-col items-center justify-center flex-grow bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen relative overflow-hidden">
+
+                        {/* Optional Decorative Background */}
+                        <div className="absolute top-0 left-0 w-64 h-64 bg-cyan-700 rounded-full opacity-20 filter blur-3xl"></div>
+                        <div className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-500 rounded-full opacity-20 filter blur-3xl"></div>
+                        <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-96 z-10">
+                            <h2 className="text-2xl font-bold text-white mb-6 text-center">
+                                {isJoining ? 'Join a Meeting' : 'Create a New Meeting'}
+                            </h2>
+
+                            {/* Username Input */}
+                            <input
+                                type="text"
+                                placeholder="Enter your username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500 mb-4"
+                            />
+
+                            {/* Meeting ID Input */}
+                            {isJoining && (
+                                <input
+                                    type="text"
+                                    placeholder="Enter Meeting ID"
+                                    className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500 mb-6"
+                                />
+                            )}
+
+                            {/* Connect Button */}
+                            <div className="flex justify-center">
+                                <ShinyButton text='Connect' onClick={connect} />
+                            </div>
+
+                            {/* Toggle Between Join and Create */}
+                            <div className="mt-3 text-center">
+                                <p className="text-gray-400">or</p>
+                                <button
+                                    onClick={() => setIsjoining(prev => !prev)}
+                                    className="text-[#06b6d4] hover:text-[#05a2bc] underline transition-colors duration-300 mt-2"
+                                >
+                                    {isJoining ? 'Create a New Meeting' : 'Join an Existing Meeting'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <footer className="absolute bottom-5 text-gray-400 text-sm w-full text-center">
+                            <p>&copy; 2024 NEXUS. All Rights Reserved.</p>
+                        </footer>
                     </div>
-                </div>
+                </>
             ) : (
                 <>
                     {/* Video Container */}
@@ -591,9 +632,7 @@ function VideoMeet() {
                                     </button>
                                 </div>
                                 {/* Messages Section */}
-                                <div className="flex-grow text-white overflow-y-auto mb-4 space-y-3"
-                                // ref={}
-                                >
+                                <div className="flex-grow text-white overflow-y-auto mb-4 space-y-3">
                                     {messages.length !== 0 ? (
                                         messages.map((item, index) => (
                                             <div
