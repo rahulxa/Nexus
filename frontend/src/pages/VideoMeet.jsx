@@ -1,10 +1,8 @@
 import React, { useRef, useState } from 'react'
 import io from "socket.io-client";
-import ShinyButton from '../components/magicui/ShinyButton';
 import { useEffect } from 'react';
-import { useLocation, Navigate, useParams } from "react-router-dom"
-import NavBar from '../components/NavBar';
-import { v4 as uuidv4 } from 'uuid';
+import { useSelector } from 'react-redux';
+import { useLocation, useParams, useNavigate } from "react-router-dom"
 
 const serverUrl = "http://localhost:8080";
 
@@ -14,11 +12,16 @@ const peerConfigConnections = {
 }
 
 function VideoMeet() {
-
+    const createdMeetingId = useSelector((state) => state.createdMeetingId?.meetingId)
+    const { url: meetingId } = useParams(); // Get the meeting ID from the URL
+    const location = useLocation();
+    const { username } = location.state || {}
+    const navigate = useNavigate();
     var socketRef = useRef();
     let socketIdRef = useRef()
     let localVideoRef = useRef();
     const videoRef = useRef([])
+    const meetingIdRef = useRef(null);
     const chatMessageRef = useRef(null);
 
     let [videoAvailable, setVideoAvailable] = useState(true);
@@ -31,8 +34,6 @@ function VideoMeet() {
     let [message, setMessage] = useState("");
     let [newMessages, setNewMessages] = useState(0);
     const [isChatOpen, setIsChatOpen] = useState(false);
-    let [username, setUsername] = useState("")
-    let [askForUsername, setAskForUsername] = useState(true);
     let [videos, setVideos] = useState([])
     const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }));
 
@@ -47,15 +48,13 @@ function VideoMeet() {
     const toggleScreenShare = () => setIsScreenSharing(!isScreenSharing);
 
 
-    const location = useLocation();
-    const slug = location.pathname.split("/").pop();
 
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(slug);
-        setTooltipText('Copied!');
-        setTimeout(() => setTooltipText('Copy Meeting ID'), 2000); // Reset the tooltip text after 2 seconds
-    };
+    // const handleCopy = () => {
+    //     navigator.clipboard.writeText(slug);
+    //     setTooltipText('Copied!');
+    //     setTimeout(() => setTooltipText('Copy Meeting ID'), 2000); // Reset the tooltip text after 2 seconds
+    // };
 
 
     useEffect(() => {
@@ -119,8 +118,16 @@ function VideoMeet() {
     }
 
     useEffect(() => {
-        getPermissions();
-    }, [])
+        console.log("createdMeetingId:", createdMeetingId);
+        console.log("meetingId from URL:", meetingId);
+        if (createdMeetingId === meetingId) {
+            getPermissions();
+        }
+        
+        else {
+            navigate("/")
+        }
+    }, [createdMeetingId, meetingId, navigate])
 
     const getUserMediaSuccess = (stream) => {
         try {
@@ -212,6 +219,7 @@ function VideoMeet() {
             }
         }
     }
+
 
     useEffect(() => {
         if (video !== undefined && audio !== undefined) {
@@ -314,12 +322,19 @@ function VideoMeet() {
         connectToSocketServer();
     }
 
-    const connect = () => {
-        setAskForUsername(false)
-        const meetingId = uuidv4();
-        window.location.href = `/${meetingId}`;
-        getMedia()
-    }
+    // useEffect(() => {
+    //     if (!meetingIdFromUrl || meetingIdFromUrl.length !== 36) {
+    //         navigate('/');
+    //     }
+    // }, [meetingIdFromUrl]);
+
+    // const connect = () => {
+    //     setAskForUsername(false);
+    //     const meetingId = uuidv4(); // Generate a unique meeting ID
+    //     meetingIdRef.current = meetingId; // Store it in ref
+    //     navigate(`/${meetingId}`); // Navigate to the new meeting URL
+    //     // Start media setup (video/audio stream)
+    // }
 
     const handleTurnOffVideo = () => {
         setVideo(!video)
@@ -442,244 +457,193 @@ function VideoMeet() {
     };
 
 
-    const [isJoining, setIsjoining] = useState(true)
+    useEffect(() => {
+        if (meetingId) {
+            getMedia()
+        } else {
+            console.log(`Meeting ID: ${meetingId}`);
+        }
+    }, [meetingId]);
+
 
     return (
         <div className="h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col relative">
-            {askForUsername ? (
-                <>
-                    <NavBar />
-                    <div className="flex flex-col items-center justify-center flex-grow bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen relative overflow-hidden">
+            {/* Video Container */}
+            <div className={`flex-grow flex items-center justify-center overflow-hidden transition-all duration-300 ${isChatOpen ? 'w-8/12' : 'w-full'}`}>
+                <div className="w-full max-w-6xl h-full">
+                    <div className={`grid gap-4 w-full h-full p-4 ${getGridClass(videos.length + 1)}`}>
+                        <div className={`relative ${videos.length === 0 ? 'col-span-full row-span-full' : ''}`}>
+                            <div className={`relative ${videos.length === 0 ? 'w-3/5 h-4/5 mx-auto' : 'w-full h-full'}`}>
+                                <video
+                                    ref={localVideoRef}
+                                    autoPlay
+                                    muted
+                                    className="w-full h-full object-cover rounded-lg"
+                                ></video>
+                                <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded">
+                                    <span className="text-white text-sm">You</span>
+                                </div>
+                            </div>
+                        </div>
+                        {videos.map((video) => (
+                            <div key={video.socketId} className="relative">
+                                <video
+                                    data-socket={video.socketId}
+                                    ref={(ref) => {
+                                        if (ref && video.stream) {
+                                            ref.srcObject = video.stream;
+                                        }
+                                    }}
+                                    autoPlay
+                                    className="w-full h-full object-cover rounded-lg"
+                                ></video>
+                                <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded">
+                                    <span className="text-white text-sm">{video.username}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
 
-                        {/* Optional Decorative Background */}
-                        <div className="absolute top-0 left-0 w-64 h-64 bg-cyan-700 rounded-full opacity-20 filter blur-3xl"></div>
-                        <div className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-500 rounded-full opacity-20 filter blur-3xl"></div>
-                        <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-96 z-10">
-                            <h2 className="text-2xl font-bold text-white mb-6 text-center">
-                                {isJoining ? 'Join a Meeting' : 'Create a New Meeting'}
-                            </h2>
+            {/* Bottom Controls */}
+            <div className={`flex justify-between p-3 ${isChatOpen ? 'w-8/12' : 'w-full'}`}>
+                <div>
+                    <h3 className='text-gray-300 text-md font-semibold mt-4'>Rahul</h3>
+                </div>
+                <div className="bg-gray-800 rounded-full shadow-lg ml-28">
+                    <div className="flex space-x-14 p-1">
+                        <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300"
+                            onClick={() => {
+                                toggleMute();
+                                handleTurnOfAudio();
+                            }}
+                            title={isMuted ? "Unmute" : "Mute"}
+                        >
+                            <i className={`fas ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'} text-white text-xl`}></i>
+                        </button>
+                        <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300"
+                            onClick={() => {
+                                toggleVideo();
+                                handleTurnOffVideo()
+                            }}
+                            title={isVideoOff ? "Turn on camera" : "Turn off camera"}
+                        >
+                            <i className={`fas ${isVideoOff ? 'fa-video-slash' : 'fa-video'} text-white text-xl`}></i>
+                        </button>
+                        <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300"
+                            onClick={() => {
+                                toggleScreenShare();
+                                handleScreenSharing();
+                            }}
+                            title={isScreenSharing ? "Stop sharing screen" : "Share screen"}
+                        >
+                            <i className={`fas ${isScreenSharing ? 'fa-stop-circle' : 'fa-desktop'} text-white text-xl`}></i>
+                        </button>
+                        <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300 relative" onClick={handleToggleChat} title="Open chat">
+                            <i className="fas fa-comment-alt text-white text-xl"></i>
+                            {newMessages > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-blue-700 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                    {newMessages > 99 ? '99+' : newMessages}
+                                </span>
+                            )}
+                        </button>
+                        <button className="p-2 rounded-full bg-red-800 hover:bg-red-900 transition-colors duration-300"
+                            title='End call'
+                            onClick={handleEndCall}
+                        >
+                            <div className="w-8 h-8 flex items-center justify-center">
+                                <i className="fas fa-phone-alt text-white text-xl transform rotate-135"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                <div className='flex'>
+                    <h6 className='text-gray-300 text-md font-semibold mt-4'>{currentTime.toUpperCase()}</h6>
+                    <p className='text-gray-300 mt-3 text-xl ml-4'>|</p>
+                    <div
+                        className="relative group"
+                        onMouseEnter={() => setShowTooltip(true)}
+                        onMouseLeave={() => setShowTooltip(false)}
+                    // onClick={handleCopy}
+                    >
+                        <h6 className='text-gray-300 text-md font-semibold mt-4 ml-4 cursor-pointer'>{ }</h6>
+                        {showTooltip && (
+                            <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-0 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out shadow-lg whitespace-nowrap'>
+                                {tooltipText}
+                                <div className='absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-800'></div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
 
-                            {/* Username Input */}
+            {/* chat box */}
+            {isChatOpen &&
+                <div
+                    className={`fixed mb-10 rounded-lg top-0 right-0 h-[95%] w-0 md:w-0 lg:w-[28%] bg-gray-900 p-6 shadow-lg transition-all duration-300 ease-in-out ${isChatOpen ? 'w-full md:w-[35%]' : 'w-0'}`}
+                >
+                    <div className="flex flex-col h-full">
+                        {/* Header */}
+                        <div className='flex justify-between items-center mb-4 border-b border-gray-700 pb-2'>
+                            <div className="text-gray-200 font-semibold text-lg">
+                                In-call Messages
+                            </div>
+                            <button
+                                onClick={handleToggleChat}
+                                className="text-gray-400 hover:text-white transition-colors duration-300 p-2 rounded-full flex items-center justify-center text-2xl"
+                                title="Close"
+                            >
+                                <i className="fas fa-times"></i>
+                            </button>
+                        </div>
+                        {/* Messages Section */}
+                        <div className="flex-grow text-white overflow-y-auto mb-4 space-y-3">
+                            {messages.length !== 0 ? (
+                                messages.map((item, index) => (
+                                    <div
+                                        key={index}
+                                        className="bg-gray-800 p-3 rounded-lg shadow-sm"
+                                        style={{
+                                            animation: `fadeInUp 0.4s ease ${index * 0.1}s forwards`,
+                                            opacity: 0
+                                        }}
+                                    >
+                                        <p className="text-cyan-400 font-semibold text-sm">{item.sender}</p>
+                                        <p className="text-gray-300 text-sm mt-1">{item.data}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-gray-500">
+                                    <p>No messages yet!</p>
+                                </div>
+                            )}
+                            <div ref={chatMessageRef} />
+                        </div>
+                        {/* Input Section */}
+                        <div className="flex items-center">
                             <input
                                 type="text"
-                                placeholder="Enter your username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500 mb-4"
+                                placeholder="Type a message..."
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleSendMessage();
+                                    }
+                                }}
+                                className="w-full text-sm p-3 rounded-full bg-gray-800 text-gray-300 border border-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                             />
-
-                            {/* Meeting ID Input */}
-                            {isJoining && (
-                                <input
-                                    type="text"
-                                    placeholder="Enter Meeting ID"
-                                    className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500 mb-6"
-                                />
-                            )}
-
-                            {/* Connect Button */}
-                            <div className="flex justify-center">
-                                <ShinyButton text='Connect' onClick={connect} />
-                            </div>
-
-                            {/* Toggle Between Join and Create */}
-                            <div className="mt-3 text-center">
-                                <p className="text-gray-400">or</p>
-                                <button
-                                    onClick={() => setIsjoining(prev => !prev)}
-                                    className="text-[#06b6d4] hover:text-[#05a2bc] underline transition-colors duration-300 mt-2"
-                                >
-                                    {isJoining ? 'Create a New Meeting' : 'Join an Existing Meeting'}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Footer */}
-                        <footer className="absolute bottom-5 text-gray-400 text-sm w-full text-center">
-                            <p>&copy; 2024 NEXUS. All Rights Reserved.</p>
-                        </footer>
-                    </div>
-                </>
-            ) : (
-                <>
-                    {/* Video Container */}
-                    <div className={`flex-grow flex items-center justify-center overflow-hidden transition-all duration-300 ${isChatOpen ? 'w-8/12' : 'w-full'}`}>
-                        <div className="w-full max-w-6xl h-full">
-                            <div className={`grid gap-4 w-full h-full p-4 ${getGridClass(videos.length + 1)}`}>
-                                <div className={`relative ${videos.length === 0 ? 'col-span-full row-span-full' : ''}`}>
-                                    <div className={`relative ${videos.length === 0 ? 'w-3/5 h-4/5 mx-auto' : 'w-full h-full'}`}>
-                                        <video
-                                            ref={localVideoRef}
-                                            autoPlay
-                                            muted
-                                            className="w-full h-full object-cover rounded-lg"
-                                        ></video>
-                                        <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded">
-                                            <span className="text-white text-sm">You</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                {videos.map((video) => (
-                                    <div key={video.socketId} className="relative">
-                                        <video
-                                            data-socket={video.socketId}
-                                            ref={(ref) => {
-                                                if (ref && video.stream) {
-                                                    ref.srcObject = video.stream;
-                                                }
-                                            }}
-                                            autoPlay
-                                            className="w-full h-full object-cover rounded-lg"
-                                        ></video>
-                                        <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded">
-                                            <span className="text-white text-sm">{video.username}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Bottom Controls */}
-                    <div className={`flex justify-between p-3 ${isChatOpen ? 'w-8/12' : 'w-full'}`}>
-                        <div>
-                            <h3 className='text-gray-300 text-md font-semibold mt-4'>Rahul</h3>
-                        </div>
-                        <div className="bg-gray-800 rounded-full shadow-lg ml-28">
-                            <div className="flex space-x-14 p-1">
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300"
-                                    onClick={() => {
-                                        toggleMute();
-                                        handleTurnOfAudio();
-                                    }}
-                                    title={isMuted ? "Unmute" : "Mute"}
-                                >
-                                    <i className={`fas ${isMuted ? 'fa-microphone-slash' : 'fa-microphone'} text-white text-xl`}></i>
-                                </button>
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300"
-                                    onClick={() => {
-                                        toggleVideo();
-                                        handleTurnOffVideo()
-                                    }}
-                                    title={isVideoOff ? "Turn on camera" : "Turn off camera"}
-                                >
-                                    <i className={`fas ${isVideoOff ? 'fa-video-slash' : 'fa-video'} text-white text-xl`}></i>
-                                </button>
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300"
-                                    onClick={() => {
-                                        toggleScreenShare();
-                                        handleScreenSharing();
-                                    }}
-                                    title={isScreenSharing ? "Stop sharing screen" : "Share screen"}
-                                >
-                                    <i className={`fas ${isScreenSharing ? 'fa-stop-circle' : 'fa-desktop'} text-white text-xl`}></i>
-                                </button>
-                                <button className="p-3 rounded-full hover:bg-gray-700 transition-colors duration-300 relative" onClick={handleToggleChat} title="Open chat">
-                                    <i className="fas fa-comment-alt text-white text-xl"></i>
-                                    {newMessages > 0 && (
-                                        <span className="absolute -top-1 -right-1 bg-blue-700 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                            {newMessages > 99 ? '99+' : newMessages}
-                                        </span>
-                                    )}
-                                </button>
-                                <button className="p-2 rounded-full bg-red-800 hover:bg-red-900 transition-colors duration-300"
-                                    title='End call'
-                                    onClick={handleEndCall}
-                                >
-                                    <div className="w-8 h-8 flex items-center justify-center">
-                                        <i className="fas fa-phone-alt text-white text-xl transform rotate-135"></i>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                        <div className='flex'>
-                            <h6 className='text-gray-300 text-md font-semibold mt-4'>{currentTime.toUpperCase()}</h6>
-                            <p className='text-gray-300 mt-3 text-xl ml-4'>|</p>
-                            <div
-                                className="relative group"
-                                onMouseEnter={() => setShowTooltip(true)}
-                                onMouseLeave={() => setShowTooltip(false)}
-                                onClick={handleCopy}
+                            <button
+                                onClick={handleSendMessage}
+                                className="bg-cyan-500 hover:bg-cyan-600 text-white p-3 ml-3 rounded-full flex items-center justify-center transition-colors duration-300 shadow-md"
+                                title='Send'
                             >
-                                <h6 className='text-gray-300 text-md font-semibold mt-4 ml-4 cursor-pointer'>{slug}</h6>
-                                {showTooltip && (
-                                    <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-0 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out shadow-lg whitespace-nowrap'>
-                                        {tooltipText}
-                                        <div className='absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-gray-800'></div>
-                                    </div>
-                                )}
-                            </div>
+                                <i className="fas fa-paper-plane"></i>
+                            </button>
                         </div>
                     </div>
-
-                    {/* chat box */}
-                    {isChatOpen &&
-                        <div
-                            className={`fixed mb-10 rounded-lg top-0 right-0 h-[95%] w-0 md:w-0 lg:w-[28%] bg-gray-900 p-6 shadow-lg transition-all duration-300 ease-in-out ${isChatOpen ? 'w-full md:w-[35%]' : 'w-0'}`}
-                        >
-                            <div className="flex flex-col h-full">
-                                {/* Header */}
-                                <div className='flex justify-between items-center mb-4 border-b border-gray-700 pb-2'>
-                                    <div className="text-gray-200 font-semibold text-lg">
-                                        In-call Messages
-                                    </div>
-                                    <button
-                                        onClick={handleToggleChat}
-                                        className="text-gray-400 hover:text-white transition-colors duration-300 p-2 rounded-full flex items-center justify-center text-2xl"
-                                        title="Close"
-                                    >
-                                        <i className="fas fa-times"></i>
-                                    </button>
-                                </div>
-                                {/* Messages Section */}
-                                <div className="flex-grow text-white overflow-y-auto mb-4 space-y-3">
-                                    {messages.length !== 0 ? (
-                                        messages.map((item, index) => (
-                                            <div
-                                                key={index}
-                                                className="bg-gray-800 p-3 rounded-lg shadow-sm"
-                                                style={{
-                                                    animation: `fadeInUp 0.4s ease ${index * 0.1}s forwards`,
-                                                    opacity: 0
-                                                }}
-                                            >
-                                                <p className="text-cyan-400 font-semibold text-sm">{item.sender}</p>
-                                                <p className="text-gray-300 text-sm mt-1">{item.data}</p>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="flex items-center justify-center h-full text-gray-500">
-                                            <p>No messages yet!</p>
-                                        </div>
-                                    )}
-                                    <div ref={chatMessageRef} />
-                                </div>
-                                {/* Input Section */}
-                                <div className="flex items-center">
-                                    <input
-                                        type="text"
-                                        placeholder="Type a message..."
-                                        value={message}
-                                        onChange={(e) => setMessage(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                handleSendMessage();
-                                            }
-                                        }}
-                                        className="w-full text-sm p-3 rounded-full bg-gray-800 text-gray-300 border border-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                                    />
-                                    <button
-                                        onClick={handleSendMessage}
-                                        className="bg-cyan-500 hover:bg-cyan-600 text-white p-3 ml-3 rounded-full flex items-center justify-center transition-colors duration-300 shadow-md"
-                                        title='Send'
-                                    >
-                                        <i className="fas fa-paper-plane"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </>)
+                </div>
             }
         </div >
     );
