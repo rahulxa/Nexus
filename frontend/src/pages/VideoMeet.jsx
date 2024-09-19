@@ -19,8 +19,6 @@ function VideoMeet() {
     var socketRef = useRef();
     let socketIdRef = useRef()
     let localVideoRef = useRef();
-    const videoRef = useRef([])
-    const meetingIdRef = useRef(null);
     const chatMessageRef = useRef(null);
 
     let [videoAvailable, setVideoAvailable] = useState(true);
@@ -28,7 +26,6 @@ function VideoMeet() {
     let [video, setVideo] = useState([]);
     let [audio, setAudio] = useState();
     let [screen, setScreen] = useState();
-    let [screenAvailable, setScreenAvailable] = useState();
     let [messages, setMessages] = useState([]);
     let [message, setMessage] = useState("");
     let [newMessages, setNewMessages] = useState(0);
@@ -47,13 +44,11 @@ function VideoMeet() {
     const toggleScreenShare = () => setIsScreenSharing(!isScreenSharing);
 
 
-
-
-    // const handleCopy = () => {
-    //     navigator.clipboard.writeText(slug);
-    //     setTooltipText('Copied!');
-    //     setTimeout(() => setTooltipText('Copy Meeting ID'), 2000); // Reset the tooltip text after 2 seconds
-    // };
+    const handleCopy = () => {
+        navigator.clipboard.writeText(meetingId);
+        setTooltipText('Copied!');
+        setTimeout(() => setTooltipText('Copy Meeting ID'), 2000); // Reset the tooltip text after 2 seconds
+    };
 
 
     useEffect(() => {
@@ -580,7 +575,7 @@ function VideoMeet() {
                         className="relative group"
                         onMouseEnter={() => setShowTooltip(true)}
                         onMouseLeave={() => setShowTooltip(false)}
-                    // onClick={handleCopy}
+                        onClick={handleCopy}
                     >
                         <h6 className='text-gray-300 text-md font-semibold mt-4 ml-4 cursor-pointer'>{meetingId}</h6>
                         {showTooltip && (
