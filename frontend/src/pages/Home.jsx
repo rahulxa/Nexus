@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import ShinyButton from '../components/magicui/ShinyButton';
 import axios from 'axios';
+import httpStatus from 'http-status';
 import { useNavigate } from 'react-router-dom';
 import { setMeetingId } from '../store/MeetingSlice';
 import { useDispatch } from 'react-redux';
@@ -9,6 +10,7 @@ function JoinAsGuest() {
 
     const [message, setMessage] = useState("")
     const [username, setUsername] = useState("");
+    const [meetingCode, setMeetingCode] = useState("")
     const [isCreatingMeeting, setIsCreatingMeeting] = useState(true)
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -19,13 +21,25 @@ function JoinAsGuest() {
             return;
         }
         try {
-            const response = await axios.post("http://localhost:8080/api/v1/meeting/create-meeting");
-            const meetingId = response.data.data.meetingCode;
-            dispatch(setMeetingId({ meetingId: meetingId }));
-            navigate(`/${meetingId}`, { state: { username } });
-            setUsername("")
+            if (isCreatingMeeting) {
+                const response = await axios.post("http://localhost:8080/api/v1/meeting/create-meeting");
+                if (response.status === httpStatus.OK) {
+                    const meetingId = response.data.data.meetingCode;
+                    dispatch(setMeetingId({ meetingId: meetingId }));
+                    navigate(`/${meetingId}`, { state: { username } });
+                    setUsername("")
+                }
+            } else {
+                const response = await axios.post("http://localhost:8080/api/v1/meeting/join-meeting", { meetingId: meetingCode });
+                if (response.status === httpStatus.OK) {
+                    navigate(`/${meetingCode}`, { state: { username } });
+                    setUsername("")
+                    setMeetingCode("")
+                }
+            }
         } catch (error) {
-            setMessage(error.response.data.message)
+            console.log("here error:", error)
+            // setMessage(error.response.data.message)
         }
     }
 
@@ -54,6 +68,8 @@ function JoinAsGuest() {
                     {!isCreatingMeeting && (
                         <input
                             type="text"
+                            value={meetingCode}
+                            onChange={(e) => setMeetingCode(e.target.value)}
                             placeholder="Enter Meeting ID"
                             className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500 mb-6"
                         />
