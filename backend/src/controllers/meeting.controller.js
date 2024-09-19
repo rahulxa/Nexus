@@ -52,9 +52,14 @@ const joinExistingMeeting = asyncHandler(async (req, res) => {
         return res
             .status(httpStatus.OK)
             .json(new ApiResponse(existingMeetingId, "Meeting id found successfully"))
+
     } catch (error) {
+        console.log("meeting id error", error)
         return res
             .status(httpStatus.INTERNAL_SERVER_ERROR)
             .json({ message: "An unexpected error occourred" })
     }
-})
+});
+
+
+export { createNewMeeting, joinExistingMeeting }

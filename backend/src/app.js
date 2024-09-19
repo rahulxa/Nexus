@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 
 
 import userRouter from "./routes/user.routes.js";
+import meetingRouter from "./routes/meeting.routes.js";
 
 
 const app = express();
@@ -28,6 +29,7 @@ app.use(cookieParser()); //cookies for storing access and refresh tokens
 //routes
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/meeting", meetingRouter);
 
 
 export { app }
