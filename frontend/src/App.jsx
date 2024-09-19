@@ -29,7 +29,7 @@ function App() {
             <Route index element={<Landing />} />
             <Route path="authentication" element={<Authentication />} />
             <Route path="logout" element={<Logout />} />
-            <Route path="join as guest" element={<JoinAsGuest />} />
+            <Route path="join-as-guest" element={<JoinAsGuest />} />
           </Route>
           <Route path="home" element={<Home />} />
           <Route path="/:url" element={<VideoMeet />} />

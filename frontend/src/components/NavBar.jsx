@@ -14,7 +14,7 @@ function NavBar() {
                         </Link>
                     </div>
                     <div className='flex items-center space-x-4'>
-                        <Link to="/Join as guest">
+                        <Link to="/Join-as guest">
                             <ShinyButton text="Join as Guest" className="ml-2">
                                 <ArrowRightIcon className="size-3 ml-1 mt-1 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
                             </ShinyButton>

@@ -1,25 +1,28 @@
 import React, { useState } from 'react'
 import ShinyButton from '../components/magicui/ShinyButton';
 import { useNavigate } from 'react-router-dom';
-import { nanoid } from "nanoid"
-import { setMeetingId } from '../store/MeetingSlice';
-import { useDispatch } from 'react-redux';
+import httpStatus from "http-status";
+import axios from 'axios';
 
 function JoinAsGuest() {
 
-    const disptach = useDispatch();
     const navigate = useNavigate();
+    const [meetingId, setMeetingId] = useState("")
     const [username, setUsername] = useState("")
     const [message, setMessage] = useState("")
-    const [meetingId, setMeetingId] = useState(null)
 
-    const connect = () => {
+    const connect = async () => {
         try {
-            const response = a
+            const response = await axios.post("http://localhost:8080/api/v1/meeting/join-meeting", { meetingId });
+            // const meetingCode = response.data.data.meetingCode;
+            if (response.status === httpStatus.OK) {
+                navigate(`/${meetingId}`, { state: { username } });
+                setUsername("")
+            }
         } catch (error) {
-
+            console.log("joining error:", error)
+            // setMessage(error.response.data.message)
         }
-        // navigate(`/${meetingId}`, { state: { username } }); 
     }
 
     return (
@@ -37,7 +40,7 @@ function JoinAsGuest() {
                     {/* Username Input */}
                     <input
                         type="text"
-                        placeholder="Enter your username"
+                        placeholder="Enter your Meeting name"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500 mb-4"
@@ -47,6 +50,8 @@ function JoinAsGuest() {
 
                     <input
                         type="text"
+                        value={meetingId}
+                        onChange={(e) => setMeetingId(e.target.value)}
                         placeholder="Enter Meeting ID"
                         className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500 mb-6"
                     />

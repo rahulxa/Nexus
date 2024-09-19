@@ -32,6 +32,7 @@ const createNewMeeting = asyncHandler(async (req, res) => {
 
 
 const joinExistingMeeting = asyncHandler(async (req, res) => {
+    console.log("Request received:", req.body);
     const { meetingId } = req.body;
 
     if (!meetingId) {
@@ -41,7 +42,7 @@ const joinExistingMeeting = asyncHandler(async (req, res) => {
     }
 
     try {
-        const existingMeetingId = await Meeting.findOne({ meetingId });
+        const existingMeetingId = await Meeting.findOne({ meetingCode: meetingId });
 
         if (!existingMeetingId) {
             return res
@@ -54,7 +55,6 @@ const joinExistingMeeting = asyncHandler(async (req, res) => {
             .json(new ApiResponse(existingMeetingId, "Meeting id found successfully"))
 
     } catch (error) {
-        console.log("meeting id error", error)
         return res
             .status(httpStatus.INTERNAL_SERVER_ERROR)
             .json({ message: "An unexpected error occourred" })

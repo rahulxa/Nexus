@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import ShinyButton from '../components/magicui/ShinyButton';
 import axios from 'axios';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { nanoid } from "nanoid"
+import { useNavigate } from 'react-router-dom';
 import { setMeetingId } from '../store/MeetingSlice';
 import { useDispatch } from 'react-redux';
 
@@ -24,6 +23,7 @@ function JoinAsGuest() {
             const meetingId = response.data.data.meetingCode;
             dispatch(setMeetingId({ meetingId: meetingId }));
             navigate(`/${meetingId}`, { state: { username } });
+            setUsername("")
         } catch (error) {
             setMessage(error.response.data.message)
         }

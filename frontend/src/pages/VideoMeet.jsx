@@ -117,11 +117,11 @@ function VideoMeet() {
     }
 
     useEffect(() => {
-        if (meetingId) {
+        if (meetingId && username) {
             getPermissions();
         }
         else {
-            navigate("/")
+            navigate("/join-as-guest")
         }
     }, [meetingId, navigate])
 
@@ -248,69 +248,88 @@ function VideoMeet() {
 
 
     const connectToSocketServer = () => {
-        socketRef.current = io.connect(serverUrl, { secure: false });
-        socketRef.current.on("signal", gotMessageFromServer);
+        if (!socketRef.current) {
+            // Connect to the server if not already connected
+            socketRef.current = io.connect(serverUrl, { secure: false });
 
-        socketRef.current.on("connect", () => {
-            socketRef.current.emit("join-call", window.location.href)
-            socketIdRef.current = socketRef.current.id
-            socketRef.current.on("chat-message", addMessage)
-            socketRef.current.on("user-left", (id) => {
-                setVideos(prevVideos => prevVideos.filter(video => video.socketId !== id));
-            });
+            // Handle signaling
+            socketRef.current.on("signal", gotMessageFromServer);
 
-            socketRef.current.on("user-joined", (userJoinedId, clients) => {
-                clients.forEach((socketsListId) => {
-                    connections[socketsListId] = new RTCPeerConnection(peerConfigConnections);
-                    connections[socketsListId].onicecandidate = (event) => {
-                        if (event.candidate !== null) {
-                            socketRef.current.emit("signal", socketsListId, JSON.stringify({ "ice": event.candidate }))
-                        }
-                    }
-                    connections[socketsListId].onaddstream = (event) => {
-                        setVideos(prevVideos => {
-                            const videoExists = prevVideos.find(v => v.socketId === socketsListId);
-                            if (videoExists) {
-                                return prevVideos.map(v => v.socketId === socketsListId ? { ...v, stream: event.stream } : v);
-                            } else {
-                                return [...prevVideos, {
-                                    socketId: socketsListId,
-                                    stream: event.stream,
-                                    autoPlay: true,
-                                    playsInLine: true,
-                                    username: username
-                                }];
+            // Handle connection event
+            socketRef.current.on("connect", () => {
+                socketRef.current.emit("join-call", window.location.href);
+                socketIdRef.current = socketRef.current.id;
+
+                // Set up listeners
+                socketRef.current.on("user-left", (id) => {
+                    setVideos((prevVideos) => prevVideos.filter((video) => video.socketId !== id));
+                });
+
+                socketRef.current.on("user-joined", (userJoinedId, clients) => {
+                    clients.forEach((socketsListId) => {
+                        connections[socketsListId] = new RTCPeerConnection(peerConfigConnections);
+                        connections[socketsListId].onicecandidate = (event) => {
+                            if (event.candidate !== null) {
+                                socketRef.current.emit("signal", socketsListId, JSON.stringify({ ice: event.candidate }));
                             }
-                        });
-                    }
+                        };
+                        connections[socketsListId].onaddstream = (event) => {
+                            setVideos((prevVideos) => {
+                                const videoExists = prevVideos.find((v) => v.socketId === socketsListId);
+                                if (videoExists) {
+                                    return prevVideos.map((v) =>
+                                        v.socketId === socketsListId ? { ...v, stream: event.stream } : v
+                                    );
+                                } else {
+                                    return [
+                                        ...prevVideos,
+                                        {
+                                            socketId: socketsListId,
+                                            stream: event.stream,
+                                            autoPlay: true,
+                                            playsInLine: true,
+                                            username: username,
+                                        },
+                                    ];
+                                }
+                            });
+                        };
 
-                    if (window.localStream !== undefined && window.localStream !== null) {
-                        connections[socketsListId].addStream(window.localStream);
-                    } else {
-                        const blackSilence = (...args) => new MediaStream([blackScreen(...args), silence()])
+                        if (window.localStream !== undefined && window.localStream !== null) {
+                            connections[socketsListId].addStream(window.localStream);
+                        } else {
+                            const blackSilence = (...args) => new MediaStream([blackScreen(...args), silence()]);
+                            window.localStream = blackSilence();
+                            connections[socketsListId].addStream(window.localStream);
+                        }
+                    });
 
-                        window.localStream = blackSilence();
-                        connections[socketsListId].addStream(window.localStream)
+                    // Handle when the user joins
+                    if (userJoinedId === socketIdRef.current) {
+                        for (let id in connections) {
+                            if (id === socketIdRef.current) continue;
+                            try {
+                                connections[id].addStream(window.localStream);
+                            } catch (error) {
+                                console.log(error);
+                            }
+                            connections[id]
+                                .createOffer()
+                                .then((description) => connections[id].setLocalDescription(description))
+                                .then(() =>
+                                    socketRef.current.emit("signal", id, JSON.stringify({ sdp: connections[id].localDescription }))
+                                )
+                                .catch((e) => console.log(e));
+                        }
                     }
                 });
-                //id = id of the joined user
-                if (userJoinedId === socketIdRef.current) {
-                    for (let id in connections) { // exisiting id in connections object
-                        if (id === socketIdRef) continue
-                        try {
-                            connections[id].addStream(window.localStream)
-                        } catch (error) {
-                            console.log(error)
-                        }
-                        connections[id].createOffer()
-                            .then(description => connections[id].setLocalDescription(description))
-                            .then(() => socketRef.current.emit("signal", id, JSON.stringify({ "sdp": connections[id].localDescription })))
-                            .catch(e => console.log(e))
-                    }
-                }
             });
-        });
-    }
+
+            // Ensure the "chat-message" event listener is only registered once
+            socketRef.current.on("chat-message", addMessage);
+        }
+    };
+
 
     const getMedia = () => {
         setVideo(videoAvailable)
