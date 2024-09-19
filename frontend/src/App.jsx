@@ -6,6 +6,7 @@ import Footer from "./components/Footer"
 import Landing from "./pages/Landing"
 import Authentication from "./pages/Authentication"
 import Logout from "./pages/Logout"
+import Home from "./pages/Home"
 import VideoMeet from "./pages/VideoMeet"
 import JoinAsGuest from "./pages/JoinAsGuest"
 
@@ -30,6 +31,7 @@ function App() {
             <Route path="logout" element={<Logout />} />
             <Route path="join as guest" element={<JoinAsGuest />} />
           </Route>
+          <Route path="home" element={<Home />} />
           <Route path="/:url" element={<VideoMeet />} />
         </Routes>
       </BrowserRouter>

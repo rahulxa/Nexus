@@ -1,8 +1,8 @@
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import httpStatus from "http-status"
-import { Meeting } from "../models/meeting.model";
+import { Meeting } from "../models/meeting.model.js";
 import { nanoid } from "nanoid"
-import { ApiResponse } from "../utils/apiResponse";
+import { ApiResponse } from "../utils/apiResponse.js";
 
 
 const createNewMeeting = asyncHandler(async (req, res) => {

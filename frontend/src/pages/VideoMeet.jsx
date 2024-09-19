@@ -12,7 +12,6 @@ const peerConfigConnections = {
 }
 
 function VideoMeet() {
-    const createdMeetingId = useSelector((state) => state.createdMeetingId?.meetingId)
     const { url: meetingId } = useParams(); // Get the meeting ID from the URL
     const location = useLocation();
     const { username } = location.state || {}
@@ -118,16 +117,13 @@ function VideoMeet() {
     }
 
     useEffect(() => {
-        console.log("createdMeetingId:", createdMeetingId);
-        console.log("meetingId from URL:", meetingId);
-        if (createdMeetingId === meetingId) {
+        if (meetingId) {
             getPermissions();
         }
-        
         else {
             navigate("/")
         }
-    }, [createdMeetingId, meetingId, navigate])
+    }, [meetingId, navigate])
 
     const getUserMediaSuccess = (stream) => {
         try {
@@ -567,7 +563,7 @@ function VideoMeet() {
                         onMouseLeave={() => setShowTooltip(false)}
                     // onClick={handleCopy}
                     >
-                        <h6 className='text-gray-300 text-md font-semibold mt-4 ml-4 cursor-pointer'>{ }</h6>
+                        <h6 className='text-gray-300 text-md font-semibold mt-4 ml-4 cursor-pointer'>{meetingId}</h6>
                         {showTooltip && (
                             <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-0 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out shadow-lg whitespace-nowrap'>
                                 {tooltipText}
