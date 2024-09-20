@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react'
 import io from "socket.io-client";
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import axios from 'axios';
 import { useLocation, useParams, useNavigate } from "react-router-dom"
 
 const serverUrl = "http://localhost:8080";
@@ -332,19 +332,6 @@ function VideoMeet() {
         connectToSocketServer();
     }
 
-    // useEffect(() => {
-    //     if (!meetingIdFromUrl || meetingIdFromUrl.length !== 36) {
-    //         navigate('/');
-    //     }
-    // }, [meetingIdFromUrl]);
-
-    // const connect = () => {
-    //     setAskForUsername(false);
-    //     const meetingId = uuidv4(); // Generate a unique meeting ID
-    //     meetingIdRef.current = meetingId; // Store it in ref
-    //     navigate(`/${meetingId}`); // Navigate to the new meeting URL
-    //     // Start media setup (video/audio stream)
-    // }
 
     const handleTurnOffVideo = () => {
         setVideo(!video)
@@ -447,14 +434,32 @@ function VideoMeet() {
 
     useEffect(scrollToChatBottom, [messages]);
 
-    let handleEndCall = () => {
+    let handleEndCall = async () => {
+        let tracks
         try {
-            let tracks = localVideoRef.current.srcObject.getTracks()
+            tracks = localVideoRef.current.srcObject.getTracks()
             tracks.forEach(track => track.stop())
+
+            localVideoRef.current.srcObject = null; //only handling my scenario
         } catch (e) {
             console.log(e)
         }
+
+        if (videos.length === 0) {
+            console.log("All users left the call. Deleting the meeting ID.");
+            try {
+                // Remove the meeting ID from the database if all users are gone
+                await axios.delete("http://localhost:8080/api/v1/meeting/remove-meeting", {
+                    data: { meetingId }
+                });
+                console.log("Meeting ID removed from the database");
+            } catch (error) {
+                console.log("Error removing meeting ID:", error);
+            }
+        }
+
         window.location.href = "/"
+        // console.log("tracks:", tracks)
     }
 
 

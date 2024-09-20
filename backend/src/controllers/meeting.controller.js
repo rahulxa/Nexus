@@ -62,4 +62,33 @@ const joinExistingMeeting = asyncHandler(async (req, res) => {
 });
 
 
-export { createNewMeeting, joinExistingMeeting }
+
+const removeMeetingId = asyncHandler(async (req, res) => {
+    const { meetingId } = req.body;
+
+    if (!meetingId) {
+        return res
+            .status(httpStatus.BAD_REQUEST)
+            .json({ message: "Meeting id is required" })
+    }
+
+    try {
+        const deletedMeetingId = await Meeting.findOneAndDelete({ meetingCode: meetingId });
+
+        if (!deletedMeetingId) {
+            return res
+                .status(httpStatus.BAD_REQUEST)
+                .json({ message: "Invalid meeting id" })
+        }
+        return res
+            .status(httpStatus.OK)
+            .json({ message: "Meeting id deleted successfully" })
+
+    } catch (error) {
+        return res
+            .status(httpStatus.INTERNAL_SERVER_ERROR)
+            .json({ message: "An unexpected error occourred" })
+    }
+})
+
+export { createNewMeeting, joinExistingMeeting, removeMeetingId }

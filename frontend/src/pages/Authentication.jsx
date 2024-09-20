@@ -17,7 +17,7 @@ const Authentication = () => {
     const navigate = useNavigate();
 
     const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
+        setShowPassword(!showPassword);     
     };
 
     const toggleLoginSignup = () => {

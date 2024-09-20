@@ -5,7 +5,7 @@ import httpStatus from "http-status";
 import axios from 'axios';
 
 function JoinAsGuest() {
-
+    // axios.defaults.withCredentials = true;
     const navigate = useNavigate();
     const [meetingId, setMeetingId] = useState("")
     const [username, setUsername] = useState("")

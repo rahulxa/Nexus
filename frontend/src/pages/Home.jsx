@@ -7,7 +7,7 @@ import { setMeetingId } from '../store/MeetingSlice';
 import { useDispatch } from 'react-redux';
 
 function JoinAsGuest() {
-
+    // axios.defaults.withCredentials = true;
     const [message, setMessage] = useState("")
     const [username, setUsername] = useState("");
     const [meetingCode, setMeetingCode] = useState("")
@@ -23,7 +23,8 @@ function JoinAsGuest() {
         try {
             if (isCreatingMeeting) {
                 const response = await axios.post("http://localhost:8080/api/v1/meeting/create-meeting");
-                if (response.status === httpStatus.OK) {
+                console.log("Response:", response)
+                if (response.status === httpStatus.CREATED) {
                     const meetingId = response.data.data.meetingCode;
                     dispatch(setMeetingId({ meetingId: meetingId }));
                     navigate(`/${meetingId}`, { state: { username } });
@@ -31,7 +32,7 @@ function JoinAsGuest() {
                 }
             } else {
                 const response = await axios.post("http://localhost:8080/api/v1/meeting/join-meeting", { meetingId: meetingCode });
-                if (response.status === httpStatus.OK) {
+                if (response.status === httpStatus.CREATED) {
                     navigate(`/${meetingCode}`, { state: { username } });
                     setUsername("")
                     setMeetingCode("")
