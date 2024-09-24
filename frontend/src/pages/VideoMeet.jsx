@@ -439,16 +439,12 @@ function VideoMeet() {
         try {
             tracks = localVideoRef.current.srcObject.getTracks()
             tracks.forEach(track => track.stop())
-
             localVideoRef.current.srcObject = null; //only handling my scenario
         } catch (e) {
             console.log(e)
         }
-
         if (videos.length === 0) {
-            console.log("All users left the call. Deleting the meeting ID.");
             try {
-                // Remove the meeting ID from the database if all users are gone
                 await axios.delete("http://localhost:8080/api/v1/meeting/remove-meeting", {
                     data: { meetingId }
                 });
@@ -457,10 +453,15 @@ function VideoMeet() {
                 console.log("Error removing meeting ID:", error);
             }
         }
-
         window.location.href = "/"
-        // console.log("tracks:", tracks)
     }
+
+
+    useEffect(() => {
+        if (meetingId) {
+            getMedia()
+        }
+    }, [meetingId]);
 
 
     const getGridClass = (count) => {
@@ -472,15 +473,6 @@ function VideoMeet() {
     };
 
 
-    useEffect(() => {
-        if (meetingId) {
-            getMedia()
-        } else {
-            console.log(`Meeting ID: ${meetingId}`);
-        }
-    }, [meetingId]);
-
-
     return (
         <div className="h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col relative">
             {/* Video Container */}
@@ -488,7 +480,7 @@ function VideoMeet() {
                 <div className="w-full max-w-6xl h-full">
                     <div className={`grid gap-4 w-full h-full p-4 ${getGridClass(videos.length + 1)}`}>
                         <div className={`relative ${videos.length === 0 ? 'col-span-full row-span-full' : ''}`}>
-                            <div className={`relative ${videos.length === 0 ? 'w-3/5 h-4/5 mx-auto' : 'w-full h-full'}`}>
+                            <div className={`relative ${videos.length === 0 ? 'w-3/5 h-4/5 mx-auto' : videos.length > 2 ? 'w-4/5 h-4/5' : 'w-full h-full'}`}>
                                 <video
                                     ref={localVideoRef}
                                     autoPlay
@@ -501,7 +493,7 @@ function VideoMeet() {
                             </div>
                         </div>
                         {videos.map((video) => (
-                            <div key={video.socketId} className="relative">
+                            <div key={video.socketId} className={`relative ${videos.length > 2 ? 'w-4/5 h-4/5 mx-auto' : ''}`}>
                                 <video
                                     data-socket={video.socketId}
                                     ref={(ref) => {
