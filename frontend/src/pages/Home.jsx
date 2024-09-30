@@ -116,19 +116,29 @@ function JoinAsGuest() {
                 }}
             />
 
+
+            <div className="flex items-center justify-between relative z-10 ">
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="flex-shrink-0" // Prevents the logo from shrinking
+                >
+                    <img src='MyLogo.png' className='h-20 w-auto' alt="Logo" />
+                </motion.div>
+
+                <p className='text-center text-lg font-semibold text-cyan-700 border-b-2 border-cyan-700 pb-1 inline-block'>
+                    Welcome Rahul!
+                </p>
+
+                <button className="rounded-lg px-3 py-1 bg-transparent text-cyan-600 border border-cyan-600 hover:bg-cyan-950">
+                    Logout
+                </button>
+            </div>
+
+
             {/* Main Container */}
-            <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-            >
-                <img src='MyLogo.png' className='h-20 w-auto' alt="Logo" />
-            </motion.div>
-            {/* <p className='text-center'>sdas</p> */}
-            <button className="absolute rounded-lg top-4 right-4 px-3 py-1 bg-transparent text-cyan-600 border border-cyan-600 hover:bg-cyan-950 mt-5 mr-4">
-                Logout
-            </button>
-            <div className="container mx-auto px-4 py-8 relative z-10 mt-6">
+            <div className="container mx-auto px-4 py-8 relative z-10 mt-5">
                 <div className={`flex flex-col md:flex-row justify-center items-start gap-8 ${!(audioAvailable && videoAvailable) ? 'justify-center' : ''}`}>
                     {/* Video Object */}
                     {videoAvailable && (
