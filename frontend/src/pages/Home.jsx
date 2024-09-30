@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import NeonGradientCard from '../components/magicui/NeonGradientCard ';
 import { FaQuestionCircle } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 function JoinAsGuest() {
     const [username, setUsername] = useState("");
@@ -116,27 +117,18 @@ function JoinAsGuest() {
             />
 
             {/* Main Container */}
-            <div className="container mx-auto px-4 py-8 relative z-10">
-                <header className="text-center mb-12 -mt-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                    >
-                        <h1 className="text-4xl font-extrabold mb-2">
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500"
-                                style={{
-                                    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 255, 255, 0.1), 0 0 80px rgba(0, 255, 255, 0.1)'
-                                }}>
-                                NEXUS
-                            </span>
-                        </h1>
-                        <p className="text-xl text-gray-600 font-light">
-                            Connect, Communicate, Collaborate
-                        </p>
-                    </motion.div>
-                </header>
-
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+            >
+                <img src='MyLogo.png' className='h-20 w-auto' alt="Logo" />
+            </motion.div>
+            {/* <p className='text-center'>sdas</p> */}
+            <button className="absolute rounded-lg top-4 right-4 px-3 py-1 bg-transparent text-cyan-600 border border-cyan-600 hover:bg-cyan-950 mt-5 mr-4">
+                Logout
+            </button>
+            <div className="container mx-auto px-4 py-8 relative z-10 mt-6">
                 <div className={`flex flex-col md:flex-row justify-center items-start gap-8 ${!(audioAvailable && videoAvailable) ? 'justify-center' : ''}`}>
                     {/* Video Object */}
                     {videoAvailable && (
@@ -147,6 +139,13 @@ function JoinAsGuest() {
                                 muted
                                 className="w-full h-full object-cover rounded-lg"
                             ></video>
+                        </div>
+                    )}
+
+                    {/* Error Message */}
+                    {errorMessage && (
+                        <div className="text-red-500 text-center mb-4">
+                            {errorMessage}
                         </div>
                     )}
 
