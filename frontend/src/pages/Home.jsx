@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ShinyButton from '../components/magicui/ShinyButton';
 import axios from 'axios';
+import GradualSpacings from '../components/magicui/GradualSpacing';
 import httpStatus from 'http-status';
 import { useNavigate } from 'react-router-dom';
 import { setMeetingId } from '../store/MeetingSlice';
 import { useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import NeonGradientCard from '../components/magicui/NeonGradientCard ';
-import { FaVideo, FaUsers, FaLock, FaCog, FaInfoCircle, FaQuestionCircle } from 'react-icons/fa';
+import { FaQuestionCircle } from 'react-icons/fa';
 
 function JoinAsGuest() {
     const [username, setUsername] = useState("");
@@ -15,6 +16,9 @@ function JoinAsGuest() {
     const [isCreatingMeeting, setIsCreatingMeeting] = useState(true);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    let localVideoRef = useRef();
+    const [audioAvailable, setAudioAvailable] = useState(false);
+    const [videoAvailable, setVideoAvailable] = useState(false);
 
     const connect = async () => {
         if (username.trim() === "") {
@@ -42,6 +46,36 @@ function JoinAsGuest() {
             console.log("error:", error);
         }
     };
+
+    const getPermissions = async () => {
+        try {
+            // Allowing video access
+            const videoPermission = await navigator.mediaDevices.getUserMedia({ video: true });
+            console.log("vid per:", videoPermission);
+            setVideoAvailable(!!videoPermission);
+
+            // Allowing audio access
+            const audioPermission = await navigator.mediaDevices.getUserMedia({ audio: true });
+            setAudioAvailable(!!audioPermission);
+
+            if (videoAvailable || audioAvailable) {
+                const userMediaStream = await navigator.mediaDevices.getUserMedia({ video: videoAvailable, audio: audioAvailable });
+                console.log("med str:", userMediaStream);
+                if (userMediaStream) {
+                    window.localStream = userMediaStream;
+                    if (localVideoRef.current) {
+                        localVideoRef.current.srcObject = userMediaStream;
+                    }
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        getPermissions();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 relative overflow-hidden">
@@ -73,70 +107,86 @@ function JoinAsGuest() {
 
             {/* Main Container */}
             <div className="container mx-auto px-4 py-8 relative z-10">
-                <header className="text-center mb-12">
-                    <motion.h1
+                <header className="text-center mb-12 -mt-4">
+                    <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className="text-5xl font-bold text-white mb-4"
                     >
-                        Welcome to
-                        <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500 ml-2">
-                            NEXUS
-                        </span>
-                    </motion.h1>
-                    <motion.p
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-xl text-gray-300"
-                    >
-                        Connect, Communicate, Collaborate
-                    </motion.p>
+                        <h1 className="text-4xl font-extrabold mb-2">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500"
+                                style={{
+                                    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 255, 255, 0.1), 0 0 80px rgba(0, 255, 255, 0.1)'
+                                }}>
+                                NEXUS
+                            </span>
+                        </h1>
+                        <p className="text-xl text-gray-600 font-light">
+                            Connect, Communicate, Collaborate
+                        </p>
+                    </motion.div>
                 </header>
 
-                {/* Meeting Box */}
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="bg-gray-800 p-8 rounded-lg shadow-2xl backdrop-blur-lg bg-opacity-80 border border-gray-700 mx-auto w-full sm:w-3/4 md:w-2/5"
-                >
-                    <h2 className="text-3xl font-bold text-white mb-6 text-center">
-                        {isCreatingMeeting ? 'Create a New Meeting' : 'Join a Meeting'}
-                    </h2>
-                    <input
-                        type="text"
-                        placeholder="Enter your meeting name"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-all duration-300 placeholder-gray-500 mb-4"
-                    />
-                    {!isCreatingMeeting && (
+                <div className={`flex flex-col md:flex-row justify-center items-start gap-8 ${!(audioAvailable && videoAvailable) ? 'justify-center' : ''}`}>
+                    {/* Video Object */}
+                    {videoAvailable && (
+                        <div className='w-full md:w-1/2 h-64 md:h-96'>
+                            <video
+                                ref={localVideoRef}
+                                autoPlay
+                                muted
+                                className="w-full h-full object-cover rounded-lg"
+                            ></video>
+                        </div>
+                    )}
+
+                    {/* Meeting Box */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className={`bg-gray-800 p-6 rounded-lg shadow-2xl backdrop-blur-lg bg-opacity-80 border border-gray-700 mx-auto w-full sm:w-2/3 md:w-1/3 ${isCreatingMeeting ? 'mt-10' : 'mt-1'}`}
+                    >
+                        <GradualSpacings
+                            key={isCreatingMeeting ? 'Create a New Meeting' : 'Join a Meeting'}
+                        >
+                            <h2 className="text-3xl font-bold text-white mb-6 text-center">
+                                {isCreatingMeeting ? 'Create a New Meeting' : 'Join a Meeting'}
+                            </h2>
+                        </GradualSpacings>
                         <input
                             type="text"
-                            value={meetingCode}
-                            onChange={(e) => setMeetingCode(e.target.value)}
-                            placeholder="Enter Meeting ID"
-                            className="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-all duration-300 placeholder-gray-500 mb-6"
+                            placeholder="Enter your meeting name"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-all duration-300 placeholder-gray-500 mb-4"
                         />
-                    )}
-                    <div className="flex justify-center mt-6">
-                        <ShinyButton text={isCreatingMeeting ? "Create Meeting" : "Join Meeting"} onClick={connect} />
-                    </div>
-                    <div className="mt-6 text-center">
-                        <p className="text-gray-400">or</p>
-                        <button
-                            onClick={() => setIsCreatingMeeting(prev => !prev)}
-                            className="text-cyan-400 hover:text-cyan-300 underline transition-colors duration-300 mt-2 font-semibold"
-                        >
-                            {isCreatingMeeting ? 'Join an Existing Meeting' : 'Create a New Meeting'}
-                        </button>
-                    </div>
-                </motion.div>
+                        {!isCreatingMeeting && (
+                            <input
+                                type="text"
+                                value={meetingCode}
+                                onChange={(e) => setMeetingCode(e.target.value)}
+                                placeholder="Enter Meeting ID"
+                                className="w-full px-4 py-3 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-all duration-300 placeholder-gray-500 mb-6"
+                            />
+                        )}
+                        <div className="flex justify-center mt-3">
+                            <ShinyButton text={isCreatingMeeting ? "Create Meeting" : "Connect"} onClick={connect} />
+                        </div>
+                        <div className="mt-4 text-center">
+                            <p className="text-gray-400">or</p>
+                            <button
+                                onClick={() => setIsCreatingMeeting(prev => !prev)}
+                                className="text-cyan-400 hover:text-cyan-300 underline transition-colors duration-300 mt-2 font-semibold"
+                            >
+                                {isCreatingMeeting ? 'Join an Existing Meeting' : 'Create a New Meeting'}
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
 
                 {/* Bottom Section */}
-                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12">
                     {/* FAQs */}
                     <NeonGradientCard
                         borderSize={1.5}
@@ -151,34 +201,37 @@ function JoinAsGuest() {
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.6 }}
-                            className="bg-gray-900 bg-opacity-80 p-8 rounded-[16.5px] shadow-lg backdrop-blur-lg"
+                            transition={{ duration: 0.5 }}
+                            className="h-80" // Increased height
                         >
-                            <h3 className="text-2xl font-semibold text-cyan-400 mb-4">FAQs</h3>
-                            <div className="space-y-4">
-                                <div className="flex items-start space-x-3">
-                                    <FaQuestionCircle className="text-cyan-400 text-2xl" style={{ marginTop: "3px" }} />
-                                    <div>
-                                        <h4 className="text-xl font-semibold text-white">How do I join a meeting?</h4>
-                                        <p className="text-gray-300">You can join a meeting by entering the Meeting ID provided by the host in the "Join a Meeting" section.</p>
+                            <h2 className="text-2xl font-semibold text-center text-white mb-6">
+                                FAQs
+                            </h2>
+                            <ul className="text-gray-400 space-y-4"> {/* Increased spacing between items */}
+                                <li className="flex flex-col">
+                                    <div className="flex items-center">
+                                        <FaQuestionCircle className="text-cyan-400 mr-3 text-xl" />
+                                        <span className="text-lg">How do I create or join a meeting?</span>
                                     </div>
-                                </div>
-                                <div className="flex items-start space-x-3">
-                                    <FaQuestionCircle className="text-cyan-400 text-2xl" style={{ marginTop: "3px" }} />
-                                    <div>
-                                        <h4 className="text-xl font-semibold text-white">How do I join a meeting?</h4>
-                                        <p className="text-gray-300">You can join a meeting by entering the Meeting ID provided by the host in the "Join a Meeting" section.</p>
+                                    <span className="text-base mt-1 ml-8">
+                                        You can create a meeting by clicking the 'Create Meeting' button or by selecting the 'Join an Existing Meeting' link, then follow the prompts to set it up.
+                                    </span>
+                                </li>
+                                <li className="flex flex-col">
+                                    <div className="flex items-center">
+                                        <FaQuestionCircle className="text-cyan-400 mr-3 text-xl" />
+                                        <span className="text-lg">What if I forget the Meeting ID?</span>
                                     </div>
-                                </div>
-
-                                <div className="flex items-start space-x-3">
-                                    <FaQuestionCircle className="text-cyan-400 text-2xl" style={{ marginTop: "3px" }} />
-                                    <div>
-                                        <h4 className="text-xl font-semibold text-white">Can I create my own meeting?</h4>
-                                        <p className="text-gray-300">Yes, click on "Create a Meeting" to generate a new Meeting ID that you can share with others to join.</p>
+                                    <span className=" text-base mt-1 ml-8">You can retrieve the Meeting ID from your email or the meeting invite link.</span>
+                                </li>
+                                <li className="flex flex-col">
+                                    <div className="flex items-center">
+                                        <FaQuestionCircle className="text-cyan-400 mr-3 text-xl" />
+                                        <span className="text-lg">Can I use NEXUS on mobile devices?</span>
                                     </div>
-                                </div>
-                            </div>
+                                    <span className=" text-base mt-1 ml-8">Yes, NEXUS is accessible on both mobile and desktop devices.</span>
+                                </li>
+                            </ul>
                         </motion.div>
                     </NeonGradientCard>
 
@@ -196,15 +249,29 @@ function JoinAsGuest() {
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.6 }}
-                            className="bg-gray-900 bg-opacity-80 p-8 rounded-[16.5px] shadow-lg backdrop-blur-lg"
+                            transition={{ duration: 0.5 }}
+                            className="h-80" // Increased height
                         >
-                            <h3 className="text-2xl font-semibold text-cyan-400 mb-4">Quick Tips</h3>
-                            <ul className="list-disc list-inside text-gray-300 space-y-2">
-                                <li>Use a strong internet connection for the best experience.</li>
-                                <li>Test your camera and microphone before joining a meeting.</li>
-                                <li>Mute yourself when you're not speaking.</li>
-                                <li>Use screen sharing to make presentations more interactive.</li>
+                            <h2 className="text-2xl font-semibold text-center text-white mb-6">
+                                Quick Tips
+                            </h2>
+                            <ul className="text-gray-400 space-y-4"> {/* Increased spacing between items */}
+                                <li className="flex items-center">
+                                    <span className="text-cyan-400 mr-3">➤</span> {/* Aesthetic arrow */}
+                                    <span className="text-lg">Ensure your camera and microphone are on.</span>
+                                </li>
+                                <li className="flex items-center">
+                                    <span className="text-cyan-400 mr-3">➤</span>
+                                    <span className="text-lg">Join meetings a few minutes early to test your setup.</span>
+                                </li>
+                                <li className="flex items-center">
+                                    <span className="text-cyan-400 mr-3">➤</span>
+                                    <span className="text-lg">Use a stable internet connection for best results.</span>
+                                </li>
+                                <li className="flex items-center">
+                                    <span className="text-cyan-400 mr-3 mb-8">➤</span>
+                                    <span className="text-lg mb-1">Mute your microphone when not speaking to reduce background noise.</span>
+                                </li>
                             </ul>
                         </motion.div>
                     </NeonGradientCard>
