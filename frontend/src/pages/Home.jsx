@@ -19,6 +19,8 @@ function JoinAsGuest() {
     let localVideoRef = useRef();
     const [audioAvailable, setAudioAvailable] = useState(false);
     const [videoAvailable, setVideoAvailable] = useState(false);
+    const [streamReady, setStreamReady] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const connect = async () => {
         if (username.trim() === "") {
@@ -49,33 +51,41 @@ function JoinAsGuest() {
 
     const getPermissions = async () => {
         try {
-            // Allowing video access
-            const videoPermission = await navigator.mediaDevices.getUserMedia({ video: true });
-            console.log("vid per:", videoPermission);
-            setVideoAvailable(!!videoPermission);
-
-            // Allowing audio access
-            const audioPermission = await navigator.mediaDevices.getUserMedia({ audio: true });
-            setAudioAvailable(!!audioPermission);
-
-            if (videoAvailable || audioAvailable) {
-                const userMediaStream = await navigator.mediaDevices.getUserMedia({ video: videoAvailable, audio: audioAvailable });
-                console.log("med str:", userMediaStream);
-                if (userMediaStream) {
-                    window.localStream = userMediaStream;
-                    if (localVideoRef.current) {
-                        localVideoRef.current.srcObject = userMediaStream;
-                    }
-                }
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            setVideoAvailable(true);
+            setAudioAvailable(true);
+            setStreamReady(true);
+            window.localStream = stream;
+            if (localVideoRef.current) {
+                localVideoRef.current.srcObject = stream;
             }
         } catch (error) {
-            console.log(error);
+            console.log("Error getting permissions:", error);
+            setErrorMessage("Unable to access camera or microphone. Please check your permissions.");
+            if (error.name === 'NotAllowedError') {
+                setVideoAvailable(false);
+                setAudioAvailable(false);
+            } else if (error.name === 'NotFoundError') {
+                setErrorMessage("No camera or microphone found. Please check your devices.");
+            }
         }
     };
 
     useEffect(() => {
         getPermissions();
+        return () => {
+            if (window.localStream) {
+                window.localStream.getTracks().forEach(track => track.stop());
+            }
+        };
     }, []);
+
+    useEffect(() => {
+        if (streamReady && localVideoRef.current && window.localStream) {
+            localVideoRef.current.srcObject = window.localStream;
+        }
+    }, [streamReady]);
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 relative overflow-hidden">
