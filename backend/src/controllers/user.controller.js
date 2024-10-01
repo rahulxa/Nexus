@@ -4,8 +4,6 @@ import httpStatus from "http-status"
 import Jwt from "jsonwebtoken"
 import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
-import userRouter from "../routes/user.routes.js";
-
 
 const generateAccessAndRefreshTokens = async (userid) => {
     try {

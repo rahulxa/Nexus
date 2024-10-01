@@ -9,6 +9,7 @@ function Logout() {
 
     const logoutUser = async () => {
         const loggedOutUser = await axios.post("http://localhost:8080/api/v1/users/logout")
+        localStorage.removeItem("username")
         navigate("/authentication");
         console.log("user logged out");
     }

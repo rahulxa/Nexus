@@ -15,6 +15,7 @@ import Footer from "../components/Footer"
 function JoinAsGuest() {
     axios.defaults.withCredentials = true;
     const [username, setUsername] = useState("");
+    const [appUsername, setAppUsername] = useState("")
     const [meetingCode, setMeetingCode] = useState("");
     const [isCreatingMeeting, setIsCreatingMeeting] = useState(true);
     const dispatch = useDispatch();
@@ -81,6 +82,7 @@ function JoinAsGuest() {
     };
 
     useEffect(() => {
+        setAppUsername(localStorage.getItem("username"))
         getPermissions();
         return () => {
             if (window.localStream) {
@@ -150,7 +152,7 @@ function JoinAsGuest() {
                     </motion.div>
 
                     <p className='text-center text-lg font-semibold text-cyan-700 border-b-2 border-cyan-700 pb-1 inline-block'>
-                        Welcome Rahul!
+                        Welcome {appUsername}!
                     </p>
 
                     <button

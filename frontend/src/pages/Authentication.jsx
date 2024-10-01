@@ -17,7 +17,7 @@ const Authentication = () => {
     const navigate = useNavigate();
 
     const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);     
+        setShowPassword(!showPassword);
     };
 
     const toggleLoginSignup = () => {
@@ -30,8 +30,9 @@ const Authentication = () => {
             const userDetails = { username, password }
             const loggedInUser = await axios.post("http://localhost:8080/api/v1/users/login", userDetails);
             if (loggedInUser.status === httpStatus.OK) {
+                localStorage.setItem("username", loggedInUser.data.data.username);
                 console.log("logged in")
-                navigate("/home")   
+                navigate("/home")
             }
         } catch (error) {
             if (error.response && error.response.data) {
