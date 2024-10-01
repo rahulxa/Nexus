@@ -12,11 +12,15 @@ import JoinAsGuest from "./pages/JoinAsGuest"
 
 function Layout() {
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-black">
       <NavBar />
-      <Outlet />
+      <div className="flex-grow bg-cover bg-center bg-fixed" style={{ backgroundImage: 'url(back2.jpg)' }}>
+        <div className="backdrop-blur-sm bg-black bg-opacity-25 min-h-full">
+          <Outlet />
+        </div>
+      </div>
       <Footer />
-    </>
+    </div>
   )
 }
 

@@ -12,6 +12,7 @@ const peerConfigConnections = {
 }
 
 function VideoMeet() {
+    axios.defaults.withCredentials = true;
     const { url: meetingId } = useParams(); // Get the meeting ID from the URL
     const location = useLocation();
     const { username } = location.state || {}
