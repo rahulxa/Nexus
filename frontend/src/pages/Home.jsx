@@ -30,6 +30,12 @@ function JoinAsGuest() {
             alert("Please enter a username.");
             return;
         }
+        if (!isCreatingMeeting) {
+            if (meetingCode.trim() === "") {
+                alert("Please enter the meeting code");
+                return;
+            }
+        }
         try {
             if (isCreatingMeeting) {
                 const response = await axios.post("http://localhost:8080/api/v1/meeting/create-meeting");

@@ -16,6 +16,13 @@ function JoinAsGuest() {
     const [errorMessage, setErrorMessage] = useState("");
 
     const connect = async () => {
+        if (username.trim() === "") {
+            alert("Please enter username");
+            return;
+        } else if (meetingId.trim() === "") {
+            alert("Please enter the meeting id");
+            return;
+        }
         try {
             const response = await axios.post("http://localhost:8080/api/v1/meeting/join-meeting", { meetingId });
             if (response.status === httpStatus.OK) {
@@ -56,7 +63,7 @@ function JoinAsGuest() {
                 window.localStream.getTracks().forEach(track => track.stop());
             }
         };
-    }, []); 
+    }, []);
 
     useEffect(() => {
         if (streamReady && localVideoRef.current && window.localStream) {
@@ -99,6 +106,7 @@ function JoinAsGuest() {
                         <input
                             type="text"
                             placeholder="Enter your Meeting name"
+                            required
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500 mb-4"
@@ -106,6 +114,7 @@ function JoinAsGuest() {
                         <input
                             type="text"
                             value={meetingId}
+                            required
                             onChange={(e) => setMeetingId(e.target.value)}
                             placeholder="Enter Meeting ID"
                             className="w-full px-4 py-2 bg-gray-700 text-gray-200 rounded-lg border-2 border-gray-600 focus:border-cyan-400 focus:outline-none transition-colors duration-300 placeholder-gray-500 mb-6"
