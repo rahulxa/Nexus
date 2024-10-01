@@ -246,34 +246,34 @@ function JoinAsGuest() {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.5 }}
-                                className="h-80" // Increased height
+                                className="h-64" // Reduced height from h-80 to h-64
                             >
-                                <h2 className="text-2xl font-semibold text-center text-white mb-6">
+                                <h2 className="text-2xl font-semibold text-center text-white mb-4"> {/* Reduced mb-6 to mb-4 */}
                                     FAQs
                                 </h2>
-                                <ul className="text-gray-400 space-y-4"> {/* Increased spacing between items */}
+                                <ul className="text-gray-400 space-y-3"> {/* Reduced space-y-4 to space-y-3 */}
                                     <li className="flex flex-col">
                                         <div className="flex items-center">
                                             <FaQuestionCircle className="text-cyan-400 mr-3 text-xl" />
-                                            <span className="text-lg">How do I create or join a meeting?</span>
+                                            <span className="text-base">How do I create or join a meeting?</span> {/* Reduced text-lg to text-base */}
                                         </div>
-                                        <span className="text-base mt-1 ml-8">
+                                        <span className="text-sm mt-1 ml-8"> {/* Reduced text-base to text-sm */}
                                             You can create a meeting by clicking the 'Create Meeting' button or by selecting the 'Join an Existing Meeting' link, then follow the prompts to set it up.
                                         </span>
                                     </li>
                                     <li className="flex flex-col">
                                         <div className="flex items-center">
                                             <FaQuestionCircle className="text-cyan-400 mr-3 text-xl" />
-                                            <span className="text-lg">What if I forget the Meeting ID?</span>
+                                            <span className="text-base">What if I forget the Meeting ID?</span> {/* Reduced text-lg to text-base */}
                                         </div>
-                                        <span className=" text-base mt-1 ml-8">You can retrieve the Meeting ID from your email or the meeting invite link.</span>
+                                        <span className="text-sm mt-1 ml-8">You can retrieve the Meeting ID from your email or the meeting invite link.</span> {/* Reduced text-base to text-sm */}
                                     </li>
                                     <li className="flex flex-col">
                                         <div className="flex items-center">
                                             <FaQuestionCircle className="text-cyan-400 mr-3 text-xl" />
-                                            <span className="text-lg">Can I use NEXUS on mobile devices?</span>
+                                            <span className="text-base">Can I use NEXUS on mobile devices?</span> {/* Reduced text-lg to text-base */}
                                         </div>
-                                        <span className=" text-base mt-1 ml-8">Yes, NEXUS is accessible on both mobile and desktop devices.</span>
+                                        <span className="text-sm mt-1 ml-8">Yes, NEXUS is accessible on both mobile and desktop devices.</span> {/* Reduced text-base to text-sm */}
                                     </li>
                                 </ul>
                             </motion.div>
@@ -294,33 +294,32 @@ function JoinAsGuest() {
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.5 }}
-                                className="h-80" // Increased height
+                                className="h-64" // Reduced height from h-80 to h-64
                             >
-                                <h2 className="text-2xl font-semibold text-center text-white mb-6">
+                                <h2 className="text-2xl font-semibold text-center text-white mb-4"> {/* Reduced mb-6 to mb-4 */}
                                     Quick Tips
                                 </h2>
-                                <ul className="text-gray-400 space-y-4"> {/* Increased spacing between items */}
+                                <ul className="text-gray-400 space-y-3"> {/* Reduced space-y-4 to space-y-3 */}
                                     <li className="flex items-center">
-                                        <span className="text-cyan-400 mr-3">➤</span> {/* Aesthetic arrow */}
-                                        <span className="text-lg">Ensure your camera and microphone are on.</span>
+                                        <span className="text-cyan-400 mr-3">➤</span>
+                                        <span className="text-base">Ensure your camera and microphone are on.</span> {/* Reduced text-lg to text-base */}
                                     </li>
                                     <li className="flex items-center">
                                         <span className="text-cyan-400 mr-3">➤</span>
-                                        <span className="text-lg">Join meetings a few minutes early to test your setup.</span>
+                                        <span className="text-base">Join meetings a few minutes early to test your setup.</span> {/* Reduced text-lg to text-base */}
                                     </li>
                                     <li className="flex items-center">
                                         <span className="text-cyan-400 mr-3">➤</span>
-                                        <span className="text-lg">Use a stable internet connection for best results.</span>
+                                        <span className="text-base">Use a stable internet connection for best results.</span> {/* Reduced text-lg to text-base */}
                                     </li>
                                     <li className="flex items-center">
-                                        <span className="text-cyan-400 mr-3 mb-8">➤</span>
-                                        <span className="text-lg mb-1">Mute your microphone when not speaking to reduce background noise.</span>
+                                        <span className="text-cyan-400 mr-3">➤</span> {/* Removed mb-8 */}
+                                        <span className="text-base">Mute your microphone when not speaking to reduce background noise.</span> {/* Reduced text-lg to text-base and removed mb-1 */}
                                     </li>
                                 </ul>
                             </motion.div>
                         </NeonGradientCard>
                     </div>
-
                 </div>
             </div>
             <Footer />
