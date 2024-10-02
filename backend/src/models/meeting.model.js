@@ -1,7 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
 const meetingSchema = new Schema({
-    meetingCode: {
+    username: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    },
+    meetingCode: { 
         type: String,
         required: true
     },

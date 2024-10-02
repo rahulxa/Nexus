@@ -34,7 +34,7 @@ function JoinAsGuest() {
             console.log("joining error:", error);
         }
     }
-
+    
     const getPermissions = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });

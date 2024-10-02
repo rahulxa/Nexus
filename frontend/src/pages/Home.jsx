@@ -12,7 +12,7 @@ import { FaQuestionCircle } from 'react-icons/fa';
 import Footer from "../components/Footer"
 
 
-function JoinAsGuest() {
+function Home() {
     axios.defaults.withCredentials = true;
     const [username, setUsername] = useState("");
     const [appUsername, setAppUsername] = useState("")
@@ -329,4 +329,4 @@ function JoinAsGuest() {
     );
 }
 
-export default JoinAsGuest;
+export default Home;
