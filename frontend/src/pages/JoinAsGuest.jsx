@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import httpStatus from "http-status";
 import ShinyButton from '../components/magicui/ShinyButton';
+import { motion } from 'framer-motion';
 
 function JoinAsGuest() {
     axios.defaults.withCredentials = true;
@@ -88,18 +89,28 @@ function JoinAsGuest() {
                 <div className={`flex ${videoAvailable ? 'flex-row' : 'flex-col'} items-center justify-center mt-16 gap-8 w-full max-w-6xl mx-auto`}>
                     {/* Video Object */}
                     {videoAvailable && (
-                        <div className='w-1/2 h-96'>
+                        <motion.div
+                            className='w-1/2 h-96'
+                            initial={{ opacity: 0, y: -50 }}
+                            animate={streamReady ? { opacity: 1, y: 0 } : { opacity: 0, y: -50 }}
+                            transition={{ duration: 0.5 }}
+                        >
                             <video
                                 ref={localVideoRef}
                                 autoPlay
                                 muted
                                 className="w-full h-full object-cover rounded-lg"
                             ></video>
-                        </div>
+                        </motion.div>
                     )}
 
                     {/* Meeting Box */}
-                    <div className={`bg-gray-800 p-6 ml-11 rounded-lg shadow-2xl backdrop-blur-lg bg-opacity-80 border border-gray-700 ${videoAvailable ? 'w-1/3' : 'w-full max-w-xs'}`}>
+                    <motion.div
+                        className={`bg-gray-800 p-6 ml-11 rounded-lg shadow-2xl backdrop-blur-lg bg-opacity-80 border border-gray-700 ${videoAvailable ? 'w-1/3' : 'w-full max-w-xs'}`}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5 }}
+                    >
                         <h2 className="text-2xl font-bold text-white mb-6 text-center">
                             Join a Meeting
                         </h2>
@@ -122,7 +133,7 @@ function JoinAsGuest() {
                         <div className="flex justify-center">
                             <ShinyButton text='Connect' onClick={connect} />
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
         </div>
