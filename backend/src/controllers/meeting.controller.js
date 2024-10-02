@@ -18,9 +18,17 @@ const createNewMeeting = asyncHandler(async (req, res) => {
     }
 
     try {
+        const existingUser = await User.findOne({ username });
+
+        if (!existingUser) {
+            return res
+                .status(httpStatus.NOT_FOUND)
+                .json({ message: "User with this username does not exist" });
+        }
+
         const meetingId = await Meeting.create({
             meetingCode: createdMeetingId,
-            username: username
+            username: existingUser._id
         });
 
         const createdMeeting = await Meeting.findById(meetingId._id);
