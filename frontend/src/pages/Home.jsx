@@ -73,7 +73,7 @@ function Home() {
             window.localStream = stream;
             if (localVideoRef.current) {
                 localVideoRef.current.srcObject = stream;
-            }
+            }  
         } catch (error) {
             console.log("Error getting permissions:", error);
             setErrorMessage("Unable to access camera or microphone. Please check your permissions.");
@@ -153,7 +153,7 @@ function Home() {
                         transition={{ duration: 0.5 }}
                         className="flex-shrink-0"
                     >
-                        <img src='MyLogo.png' className='h-20 w-auto' alt="Logo" />
+                        <img src='MyLogo.png' className='h-20 w-auto mt-2' alt="Logo" />
                     </motion.div>
 
                     <p className='text-center text-lg font-semibold text-cyan-600 border-cyan-700 pb-1 inline-block ml-32'>
@@ -162,7 +162,7 @@ function Home() {
 
                     <div className="flex items-center space-x-4">
 
-                        <Link to="/meeting-history" className='text-cyan-600 font-semibold'>
+                        <Link to="/meeting-history" className='text-cyan-600 font-semibold hover:text-cyan-700 duration-300 ease-in-out'>
                             View Meeting History
                         </Link>
 

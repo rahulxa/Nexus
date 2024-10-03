@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BiArrowBack } from 'react-icons/bi';
 import ShinyButton from '../components/magicui/ShinyButton';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 
 function MeetingHistory() {
     const navigate = useNavigate();
@@ -23,13 +24,37 @@ function MeetingHistory() {
         getMeetingHistory();
     }, []);
 
+    const containerVariants = {
+        hidden: { opacity: 0, y: 50 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                type: 'spring',
+                stiffness: 120,
+                damping: 20,
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+    };
+
     return (
         <div className="h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col items-center justify-center relative">
             <div className="absolute top-0 left-0 w-64 h-64 bg-cyan-700 rounded-full opacity-20 filter blur-3xl"></div>
             <div className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-500 rounded-full opacity-20 filter blur-3xl"></div>
 
-            <div className="container mx-auto -mt-80">
-                <div className="flex items-center mb-4">
+            <motion.div
+                className="container mx-auto -mt-80"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
+                <motion.div className="flex items-center mb-4" variants={itemVariants}>
                     <ShinyButton
                         text={<BiArrowBack />}
                         onClick={() => navigate(-1)}
@@ -38,14 +63,20 @@ function MeetingHistory() {
                     <div className="flex-grow flex justify-center">
                         <h1 className="text-3xl font-bold text-cyan-700 mb-1 text-center -ml-12">Meeting History</h1>
                     </div>
-                </div>
+                </motion.div>
                 {meetings.length === 0 ? (
-                    <div className="bg-gray-800 shadow-md rounded-lg overflow-hidden mt-10 p-8 text-center">
+                    <motion.div
+                        className="bg-gray-800 shadow-md rounded-lg overflow-hidden mt-10 p-8 text-center"
+                        variants={itemVariants}
+                    >
                         <p className="text-xl font-semibold text-gray-300">No meetings yet</p>
                         <p className="text-gray-400 mt-2">Your meeting history will appear here once you've participated in meetings.</p>
-                    </div>
+                    </motion.div>
                 ) : (
-                    <div className="bg-gray-800 shadow-md rounded-lg overflow-hidden mt-10">
+                    <motion.div
+                        className="bg-gray-800 shadow-md rounded-lg overflow-hidden mt-10"
+                        variants={itemVariants}
+                    >
                         <table className="min-w-full divide-y divide-gray-700">
                             <thead className="bg-gray-700">
                                 <tr>
@@ -56,23 +87,23 @@ function MeetingHistory() {
                             </thead>
                             <tbody className="bg-gray-800 divide-y divide-gray-700">
                                 {meetings.map((meeting, index) => {
-                                    const meetingDate = new Date(meeting.date); // Create a date object
-                                    const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Formatting options
+                                    const meetingDate = new Date(meeting.date);
+                                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
                                     const formattedDate = meetingDate.toLocaleDateString(undefined, options);
                                     const formattedTime = meetingDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                     return (
-                                        <tr key={index}>
+                                        <motion.tr key={index} variants={itemVariants}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">{meeting.meetingId}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{formattedDate}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{formattedTime}</td>
-                                        </tr>
+                                        </motion.tr>
                                     );
                                 })}
                             </tbody>
                         </table>
-                    </div>
+                    </motion.div>
                 )}
-            </div>
+            </motion.div>
         </div>
     );
 }
