@@ -70,7 +70,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { username, password } = req.body;
-    
+
     if (!username && !password) {
         return res
             .status(httpStatus.BAD_REQUEST)
@@ -146,6 +146,35 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 
+const getUserMeetingIdHistory = asyncHandler(async (req, res) => {
+    const { username } = req.body;
+
+    if (!username) {
+        return res
+            .status(httpStatus.BAD_REQUEST)
+            .json({ message: "Username is required" })
+    }
+
+    try {
+        const user = await User.findOne({ username: username });
+        if (!user) {
+            return res
+                .status(httpStatus.NOT_FOUND)
+                .json({ message: "User with this username does not exsits" })
+        }
+        const userMeetingHistory = user.meetingHistory;
+        return res
+            .status(httpStatus.OK)
+            .json(new ApiResponse(userMeetingHistory, "Meeting history fetched successfully"))
+
+    } catch (error) {
+        return res
+            .status(httpStatus.INTERNAL_SERVER_ERROR)
+            .json(new ApiError(error, "An unexpected error occurred"));
+    }
+})
+
+
 const generateNewAccessToken = asyncHandler(async (req, res) => {
     const incomingRefreshToken = req.cookies?.refreshToken || req.body.refreshToken;
 
@@ -191,4 +220,4 @@ const generateNewAccessToken = asyncHandler(async (req, res) => {
 })
 
 
-export { registerUser, loginUser, logoutUser, generateNewAccessToken }
+export { registerUser, loginUser, logoutUser, generateNewAccessToken, getUserMeetingIdHistory }

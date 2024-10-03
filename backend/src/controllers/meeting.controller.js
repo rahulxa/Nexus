@@ -9,8 +9,31 @@ import { User } from "../models/user.models.js"
 const createNewMeeting = asyncHandler(async (req, res) => {
 
     const createdMeetingId = nanoid(10);
+    const { username } = req.body;
 
+    if (!username) {
+        return res
+            .status(httpStatus.BAD_REQUEST)
+            .json({ message: "Username is required" })
+    }
     try {
+        const existingUser = await User.findOne({ username });
+
+        if (!existingUser) {
+            return res
+                .status(httpStatus.NOT_FOUND)
+                .json({ message: "User with this username does not exist" });
+        }
+        //saving the meeting for each user
+        const newMeeting = {
+            meetingId: createdMeetingId,
+        }
+
+        existingUser.meetingHistory.push(newMeeting);
+
+        await existingUser.save();
+
+        //saving created meeting id in the database
         const meetingId = await Meeting.create({
             meetingCode: createdMeetingId,
         });
@@ -63,7 +86,6 @@ const joinExistingMeeting = asyncHandler(async (req, res) => {
             .json({ message: "An unexpected error occourred" })
     }
 });
-
 
 
 const removeMeetingId = asyncHandler(async (req, res) => {
