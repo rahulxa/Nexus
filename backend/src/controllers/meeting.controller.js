@@ -31,7 +31,14 @@ const createNewMeeting = asyncHandler(async (req, res) => {
 
         existingUser.meetingHistory.push(newMeeting);
 
-        await existingUser.save();
+        const savedMeetingId = await existingUser.save();
+
+        if (!savedMeetingId) {
+            return res
+                .status(httpStatus.INTERNAL_SERVER_ERROR)
+                .json({ message: "An unexpected error occourred" })
+        }
+
 
         //saving created meeting id in the database
         const meetingId = await Meeting.create({
@@ -58,13 +65,12 @@ const createNewMeeting = asyncHandler(async (req, res) => {
 
 
 const joinExistingMeeting = asyncHandler(async (req, res) => {
-    console.log("Request received:", req.body);
-    const { meetingId } = req.body;
+    const { meetingId, username } = req.body;
 
-    if (!meetingId) {
+    if (!meetingId && !username) {
         return res
             .status(httpStatus.BAD_REQUEST)
-            .json({ message: "Meeting id is required" })
+            .json({ message: "Meeting id and username is required" })
     }
 
     try {
@@ -74,6 +80,28 @@ const joinExistingMeeting = asyncHandler(async (req, res) => {
             return res
                 .status(httpStatus.NOT_FOUND)
                 .json({ message: "Meeting id invalid" })
+        }
+
+        const existingUser = await User.findOne({ username });
+
+        if (!existingUser) {
+            return res
+                .status(httpStatus.NOT_FOUND)
+                .json({ message: "User with this username does not exist" });
+        }
+        //saving the meetingid for user
+        const newMeeting = {
+            meetingId: existingMeetingId,
+        }
+
+        existingUser.meetingHistory.push(newMeeting);
+
+        const savedMeetingId = await existingUser.save();
+
+        if (!savedMeetingId) {
+            return res
+                .status(httpStatus.INTERNAL_SERVER_ERROR)
+                .json({ message: "An unexpected error occourred" })
         }
 
         return res

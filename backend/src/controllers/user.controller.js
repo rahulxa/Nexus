@@ -147,7 +147,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 
 const getUserMeetingIdHistory = asyncHandler(async (req, res) => {
-    const { username } = req.body;
+    const { username } = req.query;
 
     if (!username) {
         return res

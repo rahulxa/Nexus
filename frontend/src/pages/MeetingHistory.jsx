@@ -6,30 +6,29 @@ import axios from 'axios';
 
 function MeetingHistory() {
     const navigate = useNavigate();
+    const [meetings, setMeetings] = useState([]);
 
     const getMeetingHistory = async () => {
         const username = localStorage.getItem("username");
         try {
-            const response = await axios.get("http://localhost:8080/api/v1/meeting/get-meeting-history",
-                { username: username }
-            );
-            const meetings = response.data.data.meetingHistory;
-            console.log("meetings:", meetings)
+            const response = await axios.get(`http://localhost:8080/api/v1/users/get-meeting-history?username=${username}`);
+            const meetings = response.data.data;
+            setMeetings(meetings);
         } catch (error) {
-            console.log("error:", error)
+            console.log("error:", error);
         }
-    }
+    };
 
     useEffect(() => {
-        getMeetingHistory()
-    }, [])
+        getMeetingHistory();
+    }, []);
 
     return (
         <div className="h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col items-center justify-center relative">
             <div className="absolute top-0 left-0 w-64 h-64 bg-cyan-700 rounded-full opacity-20 filter blur-3xl"></div>
             <div className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-500 rounded-full opacity-20 filter blur-3xl"></div>
 
-            <div className="container mx-auto -mt-56">
+            <div className="container mx-auto -mt-80">
                 <div className="flex items-center mb-4">
                     <ShinyButton
                         text={<BiArrowBack />}
@@ -47,17 +46,24 @@ function MeetingHistory() {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Meeting Code</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Title</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
                             </tr>
                         </thead>
                         <tbody className="bg-gray-800 divide-y divide-gray-700">
+                            {meetings.map((meeting, index) => {
+                                const meetingDate = new Date(meeting.date); // Create a date object
+                                const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Formatting options
+                                const formattedDate = meetingDate.toLocaleDateString(undefined, options);
+                                const formattedTime = meetingDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                            <tr>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200"></td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400"></td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400"></td>
-                            </tr>
-
+                                return (
+                                    <tr key={index}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">{meeting.meetingId}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{formattedDate}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{formattedTime}</td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

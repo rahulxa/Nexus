@@ -49,7 +49,10 @@ function Home() {
                     setUsername("");
                 }
             } else {
-                const response = await axios.post("http://localhost:8080/api/v1/meeting/join-meeting", { meetingId: meetingCode });
+                const response = await axios.post("http://localhost:8080/api/v1/meeting/join-meeting", {
+                    meetingId: meetingCode,
+                    username: appUsername
+                });
                 if (response.status === httpStatus.CREATED) {
                     navigate(`/${meetingCode}`, { state: { username } });
                     setUsername("");
