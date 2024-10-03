@@ -13,6 +13,7 @@ const Authentication = () => {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState({ type: '', content: '' });
+    const [justRegistered, setJustRegistered] = useState(false);
 
     const navigate = useNavigate();
 
@@ -23,6 +24,12 @@ const Authentication = () => {
     const toggleLoginSignup = () => {
         setSignup(prev => !prev);
         setMessage({ type: '', content: '' });
+        if (!justRegistered) {
+            setUsername("");
+            setPassword("");
+        }
+        setEmail("");
+        setJustRegistered(false);
     };
 
     const loginUser = async (username, password) => {
@@ -52,8 +59,9 @@ const Authentication = () => {
 
             if (response.status === httpStatus.CREATED) {
                 setSignup(false);
-                setMessage({ type: 'success', content: response.data.message });
-                loginUser(username, password)
+                setMessage({ type: 'success', content: 'Registration successful. Please log in.' });
+                setJustRegistered(true);
+                setEmail("");
             }
         } catch (error) {
             if (error.response && error.response.data) {
@@ -145,10 +153,17 @@ const Authentication = () => {
                     </div>
                     <button
                         type="submit"
-                        onClick={(e) => signup ? registerUser(e) : loginUser(username, password)}
+                        onClick={(e) => {
+                            if (signup) {
+                                registerUser(e);
+                            } else {
+                                loginUser(username, password);
+                                setJustRegistered(false);
+                            }
+                        }}
                         className="w-full p-3 bg-cyan-600 text-white font-semibold rounded-md hover:bg-cyan-800 transition duration-300"
                     >
-                        {signup ? "Register" : "Login"}
+                        {signup ? "Register" : (justRegistered ? "Complete Login" : "Login")}
                     </button>
                 </form>
 

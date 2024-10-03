@@ -454,7 +454,7 @@ function VideoMeet() {
                 console.log("Error removing meeting ID:", error);
             }
         }
-        window.location.href = "/"
+        window.location.href = "/home"
     }
 
 
