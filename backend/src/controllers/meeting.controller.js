@@ -9,26 +9,10 @@ import { User } from "../models/user.models.js"
 const createNewMeeting = asyncHandler(async (req, res) => {
 
     const createdMeetingId = nanoid(10);
-    const { username } = req.body;
-
-    if (!username) {
-        return res
-            .status(httpStatus.BAD_REQUEST)
-            .json({ message: "Username is required" })
-    }
 
     try {
-        const existingUser = await User.findOne({ username });
-
-        if (!existingUser) {
-            return res
-                .status(httpStatus.NOT_FOUND)
-                .json({ message: "User with this username does not exist" });
-        }
-
         const meetingId = await Meeting.create({
             meetingCode: createdMeetingId,
-            username: existingUser._id
         });
 
         const createdMeeting = await Meeting.findById(meetingId._id);
@@ -111,40 +95,4 @@ const removeMeetingId = asyncHandler(async (req, res) => {
 });
 
 
-const getMeetingHistory = asyncHandler(async (req, res) => {
-    const { username } = req.body;
-
-    if (!username) {
-        return res
-            .status(httpStatus.BAD_REQUEST)
-            .json({ message: "Username is required" })
-    }
-    try {
-        const existingUser = await User.findOne({ username: username });
-
-        if (!existingUser) {
-            return res
-                .status(httpStatus.NOT_FOUND)
-                .json({ message: "User with this username does not exists" })
-        }
-
-        const meetingHistory = await Meeting.find({ username: existingUser._id });
-
-        if (meetingHistory.length === 0) {
-            return res
-                .status(httpStatus.NOT_FOUND)
-                .json({ message: "No previous meetings found" });
-        }
-
-        return res
-            .status(httpStatus.OK)
-            .json(new ApiResponse(meetingHistory, "Meeting history found succesfully"))
-
-    } catch (error) {
-        return res
-            .status(httpStatus.INTERNAL_SERVER_ERROR)
-            .json({ message: "An unexpected error occoured" });
-    }
-});
-
-export { createNewMeeting, joinExistingMeeting, removeMeetingId, getMeetingHistory }
+export { createNewMeeting, joinExistingMeeting, removeMeetingId }

@@ -18,6 +18,16 @@ const userSchema = new Schema({
         type: String,
         required: [true, "password is required"]
     },
+    meetingHistory: [{
+        meetingId: {
+            type: String,
+            required: true
+        },
+        date: {
+            type: Date,
+            default: Date.now
+        },
+    }],
     refreshToken: {
         type: String
     }

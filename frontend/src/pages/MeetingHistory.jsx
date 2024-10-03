@@ -1,15 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BiArrowBack } from 'react-icons/bi';
 import ShinyButton from '../components/magicui/ShinyButton';
+import axios from 'axios';
 
 function MeetingHistory() {
     const navigate = useNavigate();
-    const [meetings, setMeetings] = useState([
-        { id: 1, code: 'MEET123', date: '2024-10-15', MeetingUsername: 'Project Kickoff' },
-        { id: 2, code: 'MEET456', date: '2024-10-17', MeetingUsername: 'Sprint Planning' },
-        { id: 3, code: 'MEET789', date: '2024-10-20', MeetingUsername: 'Client Presentation' },
-    ]);
+
+    const getMeetingHistory = async () => {
+        const username = localStorage.getItem("username");
+        try {
+            const response = await axios.get("http://localhost:8080/api/v1/meeting/get-meeting-history",
+                { username: username }
+            );
+            const meetings = response.data.data.meetingHistory;
+            console.log("meetings:", meetings)
+        } catch (error) {
+            console.log("error:", error)
+        }
+    }
+
+    useEffect(() => {
+        getMeetingHistory()
+    }, [])
 
     return (
         <div className="h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col items-center justify-center relative">
@@ -38,13 +51,13 @@ function MeetingHistory() {
                             </tr>
                         </thead>
                         <tbody className="bg-gray-800 divide-y divide-gray-700">
-                            {meetings.map((meeting) => (
-                                <tr key={meeting.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">{meeting.code}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{meeting.date}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{meeting.MeetingUsername}</td>
-                                </tr>
-                            ))}
+
+                            <tr>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200"></td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400"></td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400"></td>
+                            </tr>
+
                         </tbody>
                     </table>
                 </div>
