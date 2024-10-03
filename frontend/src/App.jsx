@@ -9,6 +9,7 @@ import Logout from "./pages/Logout"
 import Home from "./pages/Home"
 import VideoMeet from "./pages/VideoMeet"
 import JoinAsGuest from "./pages/JoinAsGuest"
+import MeetingHistory from "./pages/MeetingHistory"
 
 function Layout() {
   return (
@@ -37,6 +38,7 @@ function App() {
           </Route>
           <Route path="home" element={<Home />} />
           <Route path="/:url" element={<VideoMeet />} />
+          <Route path="/meeting-history" element={<MeetingHistory />} />
         </Routes>
       </BrowserRouter>
     </Provider>

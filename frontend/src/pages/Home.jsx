@@ -3,7 +3,7 @@ import ShinyButton from '../components/magicui/ShinyButton';
 import axios from 'axios';
 import GradualSpacings from '../components/magicui/GradualSpacing';
 import httpStatus from 'http-status';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { setMeetingId } from '../store/MeetingSlice';
 import { useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
@@ -39,7 +39,9 @@ function Home() {
         }
         try {
             if (isCreatingMeeting) {
-                const response = await axios.post("http://localhost:8080/api/v1/meeting/create-meeting");
+                const response = await axios.post("http://localhost:8080/api/v1/meeting/create-meeting",
+                    { username: appUsername }
+                );
                 if (response.status === httpStatus.CREATED) {
                     const meetingId = response.data.data.meetingCode;
                     dispatch(setMeetingId({ meetingId: meetingId }));
@@ -141,27 +143,35 @@ function Home() {
                 />
 
 
-                <div className="flex items-center justify-between relative z-10 ">
+                <div className="flex items-center justify-between relative z-10 -mt-5 ml-7 mr-7">
                     <motion.div
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className="flex-shrink-0" // Prevents the logo from shrinking
+                        className="flex-shrink-0"
                     >
                         <img src='MyLogo.png' className='h-20 w-auto' alt="Logo" />
                     </motion.div>
 
-                    <p className='text-center text-lg font-semibold text-cyan-700 border-b-2 border-cyan-700 pb-1 inline-block'>
+                    <p className='text-center text-lg font-semibold text-cyan-600 border-cyan-700 pb-1 inline-block ml-32'>
                         Welcome {appUsername}!
                     </p>
 
-                    <button
-                        className="rounded-lg px-3 py-1 font-bold bg-transparent text-cyan-600 border border-cyan-600 hover:bg-cyan-950 duration-300 ease-in-out"
-                        onClick={handleLogout}
-                    >
-                        Logout
-                    </button>
+                    <div className="flex items-center space-x-4">
+
+                        <Link to="/meeting-history" className='text-cyan-600 font-semibold'>
+                            View Meeting History
+                        </Link>
+
+                        <button
+                            className="rounded-md px-3 py-1 text-sm font-bold bg-transparent text-cyan-600 border-2 border-cyan-600 hover:bg-cyan-950 duration-300 ease-in-out"
+                            onClick={handleLogout}
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
+
 
 
                 {/* Main Container */}
