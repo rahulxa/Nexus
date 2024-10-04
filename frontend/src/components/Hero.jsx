@@ -1,57 +1,131 @@
-import React from 'react'
-import WordRotate from './magicui/WordRotate'
+import React, { useRef } from 'react';
+import WordRotate from './magicui/WordRotate';
+import { AnimatedBeam } from './magicui/AnimatedBeam';
+import { FaVideo, FaDesktop, FaComments, FaMicrophone } from 'react-icons/fa'; // Video camera icon
 
 function Hero() {
-    const words = ["Connect", "Communicate", "Collaborate"]
+    const words = ["Connect", "Communicate", "Collaborate"];
+    const containerRef = useRef(null);
+    const nexusLogoRef = useRef(null);
+    const icon1Ref = useRef(null);
+    const icon2Ref = useRef(null);
+
+    const icon3Ref = useRef(null);
+    const icon4Ref = useRef(null);
 
     return (
-        <div className='relative z-10 flex flex-col min-h-screen'>
+        <div className='relative z-10 flex flex-col min-h-screen bg-black text-gray-200 -mt-10'>
+            <div className='flex flex-col items-center justify-center flex-1 px-8 mt-14'>
+                <h1 className="text-7xl font-bold font-poppins text-center">
+                    Introducing
+                    <span className="inline-block ml-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500">
+                        NEXUS
+                    </span>
+                </h1>
 
-            <div className='flex-grow flex items-center justify-between px-8'>
-                <div className='w-1/2 mb-28 '>
-                    <h1 className="text-gray-200 text-6xl font-bold font-playfair">
-                        Introducing{" "}
-                        <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-blue-500">
-                            NEXUS
-                        </span>
-                    </h1>
+                <div className="mt-4">
                     <WordRotate
                         words={words}
-                        className="text-6xl font-poppins bg-clip-text text-transparent bg-gradient-to-r from-[#00C8C8] to-[#008080]"
+                        className="text-7xl font-poppins bg-clip-text text-transparent bg-gradient-to-r from-[#00C8C8] to-[#008080]"
                     />
-                    <h1 className="text-gray-200 text-2xl font-poppins mt-4">Bringing people together wherever they are.</h1>
                 </div>
-                <div className='w-1/2 flex flex-col items-center'>
-                    <div className="relative w-96 h-64 bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-600 opacity-75"></div>
-                        <div className="absolute inset-1 bg-gray-900 rounded-lg flex items-center justify-center">
-                            <img
-                                src="nexusFrame.jpg"
-                                alt="NEXUS Call"
-                                className="w-full h-full object-cover rounded-lg"
-                            />
+
+                <h2 className="text-4xl font-roboto mt-4 text-center">Bringing people together wherever they are.</h2>
+                <div className='flex '>
+                    <p>Redefining virtual meetings.
+                        connect with ease, share with confidence,
+                        and experience communication like never before.</p>
+                </div>
+                <button className="bg-cyan-800 hover:bg-cyan-900 duration-300 ease-in-out text-gray-200 mt-16 font-md py-2 px-4 rounded-md shadow-md">
+                    Get Started
+                </button>
+
+                <div className="text-center flex justify-center space-x-24 mt-16 ml-10"> {/* Increased space-x */}
+                    <ul className="flex items-center space-x-10">
+                        <li className="flex items-center text-lg font-semibold text-gray-400 glow-effect">
+                            HD Video & Audio
+                        </li>
+                    </ul>
+
+                    <ul className="flex items-center space-x-10">
+                        <li className="flex items-center text-lg font-semibold text-gray-400 glow-effect">
+                            Screen Sharing
+                        </li>
+                    </ul>
+
+                    <ul className="flex items-center space-x-10">
+                        <li className="flex items-center text-lg font-semibold text-gray-400 glow-effect">
+                            End-to-End Encryption
+                        </li>
+                    </ul>
+                </div>
+
+
+                <div ref={containerRef} className='w-1/2 flex flex-col items-center relative' style={{ height: '400px' }}>
+                    {/* Nexus Logo */}
+                    <div ref={nexusLogoRef} className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <img src="MyLogo.png" alt="Nexus Logo" width="150" height="150" /> {/* Make this bigger */}
+                    </div>
+
+                    {/* Left Icons */}
+                    <div>
+                        <div ref={icon1Ref} className="absolute top-1/4 left-0">
+                            <FaVideo size={40} color="#00BFFF" />
+                        </div>
+                        <div ref={icon2Ref} className="absolute bottom-1/4 left-0">
+                            <FaDesktop size={40} color="#00BFFF" />
+                        </div>
+
+                        {/* Right Icons */}
+                        <div ref={icon3Ref} className="absolute top-1/4 right-0">
+                            <FaComments size={40} color="#00BFFF" />
+                        </div>
+                        <div ref={icon4Ref} className="absolute bottom-1/4 right-0">
+                            <FaMicrophone size={40} color="#00BFFF" />
                         </div>
                     </div>
-                    <div className="mt-8 text-gray-200">
-                        <ul className="space-y-2">
-                            <li className="flex items-center">
-                                <svg className="w-6 h-6 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                                HD Video & Audio
-                            </li>
-                            <li className="flex items-center">
-                                <svg className="w-6 h-6 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                                Screen Sharing
-                            </li>
-                            <li className="flex items-center">
-                                <svg className="w-6 h-6 mr-2 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                                End-to-End Encryption
-                            </li>
-                        </ul>
-                    </div>
+
+                    {/* Animated Beams */}
+                    <AnimatedBeam
+                        containerRef={containerRef}
+                        fromRef={nexusLogoRef}
+                        toRef={icon1Ref}
+                        gradientStartColor="#00C8C8"
+                        gradientStopColor="#008080"
+                        pathColor="#00C8C8"
+                        curvature={-30}
+                    />
+                    <AnimatedBeam
+                        containerRef={containerRef}
+                        fromRef={nexusLogoRef}
+                        toRef={icon2Ref}
+                        gradientStartColor="#00C8C8"
+                        gradientStopColor="#008080"
+                        pathColor="#00C8C8"
+                        curvature={30}
+                    />
+                    <AnimatedBeam
+                        containerRef={containerRef}
+                        fromRef={nexusLogoRef}
+                        toRef={icon3Ref}
+                        gradientStartColor="#00C8C8"
+                        gradientStopColor="#008080"
+                        pathColor="#00C8C8"
+                        curvature={-30}
+                    />
+                    <AnimatedBeam
+                        containerRef={containerRef}
+                        fromRef={nexusLogoRef}
+                        toRef={icon4Ref}
+                        gradientStartColor="#00C8C8"
+                        gradientStopColor="#008080"
+                        pathColor="#00C8C8"
+                        curvature={30}
+                    />
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
-export default Hero
+export default Hero;
