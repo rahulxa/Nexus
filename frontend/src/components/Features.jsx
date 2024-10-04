@@ -11,7 +11,7 @@ function Features() {
 
     return (
         <section className="py-20 px-8 bg-black bg-opacity-60">
-            <h2 className="text-4xl font-bold text-center text-gray-100 mb-12">Why Choose NEXUS?</h2>
+            <h2 style={{ fontFamily: 'Poppins, sans-serif' }} className="text-4xl font-bold text-center text-gray-100 mb-12">Why Choose NEXUS?</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {features.map((feature, index) => (
                     <NeonGradientCard
