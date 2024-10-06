@@ -23,7 +23,6 @@ function NavBar() {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             window.addEventListener('scroll', controlNavBar);
-
             return () => {
                 window.removeEventListener('scroll', controlNavBar);
             };

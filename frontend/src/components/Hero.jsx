@@ -37,20 +37,16 @@ function Hero() {
 
                 <h2 className="text-4xl font-roboto mt-4 text-center">Bringing people together wherever they are.</h2>
 
-                {/* Main content with right-aligned paragraph */}
                 <div className="flex justify-between w-full mt-4">
-                    {/* Left side content can go here, or leave empty */}
                     <div></div>
-
-                    {/* Right-aligned paragraph */}
                     <div className="w-1/3 text-sm text-right mr-9" style={{ fontFamily: 'Poppins, sans-serif' }}>
                         <p>Redefining virtual meetings</p>
                         <p style={{ marginRight: "-18px" }}>
-                            <span className='text-cyan-400'>connect with ease,</span> share with,
+                            <i className='text-cyan-400'>connect with ease,</i> share with,
                         </p>
                         <p style={{ marginRight: "1px" }}>confidence and experience </p>
                         <p style={{ marginRight: "11px" }}>
-                            <span className='text-cyan-400'>communication</span> like never
+                            <i className='text-cyan-400'>communication</i> like never
                         </p>
                         <p style={{ marginRight: "144px" }}>before.</p>
                     </div>
