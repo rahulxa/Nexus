@@ -118,45 +118,69 @@ function Hero() {
                     ))}
                 </motion.div>
 
-                <motion.div
-                    ref={containerRef}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.5, duration: 1 }}
-                    className='w-1/2 flex mt-6 flex-col items-center relative'
-                    style={{ height: '400px' }}
-                >
-                    <motion.div
-                        ref={nexusLogoRef}
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 2, duration: 1, ease: "easeOut" }}
-                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                    >
-                        <img src="MyLogo.png" alt="Nexus Logo" width="170" height="170" />
-                    </motion.div>
+                {/* animated beam */}
+                <div ref={containerRef} className='w-1/2 flex mt-6 flex-col items-center relative' style={{ height: '400px' }}>
+                    {/* Nexus Logo */}
+                    <div ref={nexusLogoRef} className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-1">
+                        <img src="MyLogo.png" alt="Nexus Logo" width="170" height="170" /> {/* Make this bigger */}
+                    </div>
 
-                    {[icon1Ref, icon2Ref, icon3Ref, icon4Ref].map((ref, index) => (
-                        <motion.div
-                            key={index}
-                            ref={ref}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 2.5 + index * 0.2, duration: 0.5 }}
-                            className={`absolute ${index % 2 === 0 ? 'top-1/4' : 'bottom-1/4'} ${index < 2 ? 'left-0' : 'right-0'}`}
-                        >
-                            {index === 0 && <FaVideo size={40} color="#00BFFF" />}
-                            {index === 1 && <FaDesktop size={40} color="#00BFFF" />}
-                            {index === 2 && <FaComments size={40} color="#00BFFF" />}
-                            {index === 3 && <FaMicrophone size={40} color="#00BFFF" />}
-                        </motion.div>
-                    ))}
+                    {/* Left Icons */}
+                    <div>
+                        <div ref={icon1Ref} className="absolute top-1/4 left-0">
+                            <FaVideo size={40} color="#00BFFF" />
+                        </div>
+                        <div ref={icon2Ref} className="absolute bottom-1/4 left-0">
+                            <FaDesktop size={40} color="#00BFFF" />
+                        </div>
 
-                    <AnimatedBeam containerRef={containerRef} fromRef={nexusLogoRef} toRef={icon1Ref} gradientStartColor="#00C8C8" gradientStopColor="#008080" pathColor="#00C8C8" curvature={-30} />
-                    <AnimatedBeam containerRef={containerRef} fromRef={nexusLogoRef} toRef={icon2Ref} gradientStartColor="#00C8C8" gradientStopColor="#008080" pathColor="#00C8C8" curvature={30} />
-                    <AnimatedBeam containerRef={containerRef} fromRef={nexusLogoRef} toRef={icon3Ref} gradientStartColor="#00C8C8" gradientStopColor="#008080" pathColor="#00C8C8" curvature={-30} />
-                    <AnimatedBeam containerRef={containerRef} fromRef={nexusLogoRef} toRef={icon4Ref} gradientStartColor="#00C8C8" gradientStopColor="#008080" pathColor="#00C8C8" curvature={30} />
-                </motion.div>
+                        {/* Right Icons */}
+                        <div ref={icon3Ref} className="absolute top-1/4 right-0">
+                            <FaComments size={40} color="#00BFFF" />
+                        </div>
+                        <div ref={icon4Ref} className="absolute bottom-1/4 right-0">
+                            <FaMicrophone size={40} color="#00BFFF" />
+                        </div>
+                    </div>
+
+                    {/* Animated Beams */}
+                    <AnimatedBeam
+                        containerRef={containerRef}
+                        fromRef={nexusLogoRef}
+                        toRef={icon1Ref}
+                        gradientStartColor="#00C8C8"
+                        gradientStopColor="#008080"
+                        pathColor="#00C8C8"
+                        curvature={-5}
+                    />
+                    <AnimatedBeam
+                        containerRef={containerRef}
+                        fromRef={nexusLogoRef}
+                        toRef={icon2Ref}
+                        gradientStartColor="#00C8C8"
+                        gradientStopColor="#008080"
+                        pathColor="#00C8C8"
+                        curvature={5}
+                    />
+                    <AnimatedBeam
+                        containerRef={containerRef}
+                        fromRef={nexusLogoRef}
+                        toRef={icon3Ref}
+                        gradientStartColor="#00C8C8"
+                        gradientStopColor="#008080"
+                        pathColor="#00C8C8"
+                        curvature={-5}
+                    />
+                    <AnimatedBeam
+                        containerRef={containerRef}
+                        fromRef={nexusLogoRef}
+                        toRef={icon4Ref}
+                        gradientStartColor="#00C8C8"
+                        gradientStopColor="#008080"
+                        pathColor="#00C8C8"
+                        curvature={5}
+                    />
+                </div>
             </div>
         </div>
     );
