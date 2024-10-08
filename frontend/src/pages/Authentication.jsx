@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import GradualSpacing from '../components/magicui/GradualSpacing';
 import axios from "axios";
 import httpStatus from "http-status";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from 'framer-motion'; // Import Framer Motion
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Authentication = () => {
     axios.defaults.withCredentials = true;
@@ -141,26 +140,28 @@ const Authentication = () => {
 
                     {/* Form Fields */}
                     <motion.form variants={childVariants} className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+
+                        <motion.input
+                            variants={childVariants}
+                            className="w-full p-3 bg-black text-white placeholder-gray-400 border-b border-gray-600 focus:outline-none focus:border-gray-300 transition duration-300"
+                            type="text"
+                            placeholder="Username"
+                            autoComplete="off"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
                         {signup && (
                             <motion.input
                                 variants={childVariants}
                                 className="w-full p-3 bg-black text-white placeholder-gray-400 border-b border-gray-600 focus:outline-none focus:border-gray-300 transition duration-300"
                                 type="text"
-                                placeholder="Username"
+                                placeholder="Email address"
                                 autoComplete="off"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                             />
                         )}
-                        <motion.input
-                            variants={childVariants}
-                            className="w-full p-3 bg-black text-white placeholder-gray-400 border-b border-gray-600 focus:outline-none focus:border-gray-300 transition duration-300"
-                            type="text"
-                            placeholder="Email address"
-                            autoComplete="off"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
+
                         <motion.div variants={childVariants} className="relative">
                             <input
                                 className="w-full p-3 bg-black text-white placeholder-gray-400 border-b border-gray-600 focus:outline-none focus:border-gray-300 transition duration-300"
