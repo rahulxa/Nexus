@@ -118,10 +118,10 @@ function Home() {
 
     return (
         <>
-            <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 relative overflow-hidden">
+            <div className="min-h-screen bg-gradient-to-br bg-black p-4 relative overflow-hidden">
                 {/* Background Elements */}
                 <motion.div
-                    className="absolute top-0 left-0 w-64 h-64 bg-cyan-700 rounded-full opacity-20 filter blur-3xl"
+                    className="absolute top-0 left-0 w-64 h-64 bg-black rounded-full opacity-20 filter blur-3xl"
                     animate={{
                         scale: [1, 1.2, 1],
                         rotate: [0, 90, 0],
@@ -133,7 +133,7 @@ function Home() {
                     }}
                 />
                 <motion.div
-                    className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-500 rounded-full opacity-20 filter blur-3xl"
+                    className="absolute bottom-0 right-0 w-64 h-64 bg-black rounded-full opacity-20 filter blur-3xl"
                     animate={{
                         scale: [1, 1.2, 1],
                         rotate: [0, -90, 0],

@@ -34,7 +34,7 @@ function JoinAsGuest() {
             console.log("joining error:", error);
         }
     }
-    
+
     const getPermissions = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -73,10 +73,10 @@ function JoinAsGuest() {
     }, [streamReady]);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 flex flex-col items-center justify-center relative">
+        <div className="h-screen bg-black p-4 flex flex-col items-center justify-center relative">
             {/* Decorative Background */}
-            <div className="absolute top-0 left-0 w-64 h-64 bg-cyan-700 rounded-full opacity-20 filter blur-3xl"></div>
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-500 rounded-full opacity-20 filter blur-3xl"></div>
+            {/* <div className="absolute top-0 left-0 w-64 h-64 bg-cyan-700 rounded-full opacity-20 filter blur-3xl"></div>
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-500 rounded-full opacity-20 filter blur-3xl"></div> */}
 
             <div className="container mx-auto px-4 py-8 relative z-10">
                 {/* Error Message */}
