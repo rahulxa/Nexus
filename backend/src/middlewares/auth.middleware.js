@@ -5,6 +5,7 @@ import httpStatus from "http-status"
 
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
+    console.log("this is token:", req.cookies?.accessToken)
     //getting the access token form the req which has cookies cuz of cookie parser middleware
     try {
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");

@@ -59,6 +59,9 @@ const Authentication = () => {
             const userDetails = { username, password }
             const loggedInUser = await axios.post("http://localhost:8080/api/v1/users/login", userDetails);
             if (loggedInUser.status === httpStatus.OK) {
+                console.log("this is token:", loggedInUser.data.data)
+                console.log(document.cookie);
+                console.log(loggedInUser.headers['set-cookie']); // This logs any cookies sent by the server
                 localStorage.setItem("username", loggedInUser.data.data.username);
                 console.log("logged in")
                 navigate("/home")
@@ -143,7 +146,7 @@ const Authentication = () => {
 
                         <motion.input
                             variants={childVariants}
-                            className="w-full p-3 bg-black text-white placeholder-gray-400 border-b border-gray-600 focus:outline-none focus:border-gray-300 transition duration-300"
+                            className="w-full p-3 bg-black text-white placeholder-gray-400 border-b border-gray-600 outline-none transition duration-300 focus:border-gray-600 autofill-override"
                             type="text"
                             placeholder="Username"
                             autoComplete="off"
@@ -153,7 +156,7 @@ const Authentication = () => {
                         {signup && (
                             <motion.input
                                 variants={childVariants}
-                                className="w-full p-3 bg-black text-white placeholder-gray-400 border-b border-gray-600 focus:outline-none focus:border-gray-300 transition duration-300"
+                                className="w-full p-3 bg-black text-white placeholder-gray-400 border-b border-gray-600 outline-none transition duration-300 focus:outline-none focus:border-transparent"
                                 type="text"
                                 placeholder="Email address"
                                 autoComplete="off"
@@ -164,7 +167,7 @@ const Authentication = () => {
 
                         <motion.div variants={childVariants} className="relative">
                             <input
-                                className="w-full p-3 bg-black text-white placeholder-gray-400 border-b border-gray-600 focus:outline-none focus:border-gray-300 transition duration-300"
+                                className="w-full p-3 bg-black text-white placeholder-gray-400 border-b border-gray-600 outline-none transition duration-300 focus:outline-none focus:border-transparent"
                                 type={showPassword ? "text" : "password"}
                                 placeholder="Password"
                                 autoComplete="off"

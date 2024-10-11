@@ -11,6 +11,8 @@
     /* background-color: bl; */
 }
 
+
+
 :root {
     --primary: 180 100% 50%;
     background-color: black;
@@ -18,16 +20,39 @@
 }
 
 
-input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0px 1000px #2d3748 inset !important;
-    -webkit-text-fill-color: #ffffff !important;
-    transition: background-color 5000s ease-in-out 0s;
+/* Override autofill styles */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s;
 }
 
-input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0px 1000px #2d3748 inset !important;
-    -webkit-text-fill-color: #ffffff !important;
-    transition: background-color 5000s ease-in-out 0s;
+input.autofill-override:-webkit-autofill,
+input.autofill-override:-webkit-autofill:hover,
+input.autofill-override:-webkit-autofill:focus,
+input.autofill-override:-webkit-autofill:active {
+    -webkit-text-fill-color: white !important;
+    -webkit-box-shadow: 0 0 0px 1000px black inset !important;
+}
+
+/* Remove focus outline for all browsers */
+input:focus,
+input:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+}
+
+/* Ensure text remains white on focus */
+input:focus {
+    color: white !important;
+}
+
+/* Maintain border on focus */
+input:focus {
+    border-bottom: 1px solid #4a5568 !important;
+    /* Tailwind's gray-600 */
 }
 
 .video-grid {
