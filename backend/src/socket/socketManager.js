@@ -3,6 +3,7 @@ import { Server } from "socket.io"
 let connections = {}
 let messages = {}
 let timeOnline = {}
+const usernames = {};
 
 //connections example
 // {
@@ -22,22 +23,42 @@ const connectToSocket = (server) => {
 
     //listening for connections
     io.on("connection", (socket) => {
-        socket.on("join-call", (path) => { //path is the room
+        socket.on("join-call", (data) => {
+            const { path, username } = data;
             if (connections[path] === undefined) {
-                connections[path] = [] //uss specific room k liye ek empty array create hota hai taaki ab jo bhi naye user join ho unke id's ko iss room k array mai push kiya jaa sake 
+                connections[path] = [];
             }
-            connections[path].push(socket.id); //uss specific path(room) k array mai uss user k id ko push kardo
+
+            // Store username mapping
+            usernames[socket.id] = username;
+            connections[path].push(socket.id);
             timeOnline[socket.id] = new Date();
 
+            // Create array of existing users with their usernames
+            const existingUsers = connections[path].map(socketId => ({
+                socketId,
+                username: usernames[socketId]
+            }));
+
+            // Notify existing users about new user
             connections[path].forEach(element => {
-                io.to(element).emit("user-joined", socket.id, connections[path]) //notifying every user of the new joinee
+                if (element !== socket.id) { // Don't send to the new user
+                    io.to(element).emit("user-joined", {
+                        socketId: socket.id,
+                        username: username,
+                        allUsers: existingUsers
+                    });
+                }
             });
+
+            // Send existing users info to new user
+            io.to(socket.id).emit("user-list", existingUsers);
 
             if (messages[path] !== undefined) {
                 messages[path].forEach(element => {
                     io.to(socket.id).emit("chat-message", element['data'], element['sender'], element["socket-id-sender"]);
                 });
-            };
+            }
         });
 
         socket.on("signal", (toId, message) => {
@@ -67,6 +88,7 @@ const connectToSocket = (server) => {
         });
 
         socket.on("disconnect", () => {
+            delete usernames[socket.id];
             var diffTime = Math.abs(timeOnline[socket.id] - new Date());
             var key;
 

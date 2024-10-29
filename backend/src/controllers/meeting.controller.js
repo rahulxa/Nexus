@@ -86,9 +86,9 @@ const joinExistingMeeting = asyncHandler(async (req, res) => {
 
         if (!existingUser) {
             return res
-                .status(httpStatus.NOT_FOUND)
-                .json({ message: "User with this username does not exist" });
+                .json({ message: "Guest user has joined" })
         }
+
         //saving the meetingid for user
         const newMeeting = {
             meetingId: existingMeetingId,
