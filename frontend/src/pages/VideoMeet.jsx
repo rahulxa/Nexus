@@ -8,14 +8,6 @@ const serverUrl = "http://localhost:8080";
 
 var connections = {}
 
-// const peerConfigConnections = {
-//     iceServers: [
-//         { urls: 'stun:stun.l.google.com:19302' },
-//         { urls: 'stun:stun1.l.google.com:19302' },
-//         { urls: 'stun:stun2.l.google.com:19302' }
-//     ]
-// };
-
 function VideoMeet() {
     axios.defaults.withCredentials = true;
     const { url: meetingId } = useParams(); // Get the meeting ID from the URL
@@ -125,45 +117,73 @@ function VideoMeet() {
         }
     }, [meetingId, navigate])
 
+
     const getUserMediaSuccess = (stream) => {
         try {
-            // Stop existing tracks
+            // Stop existing tracks in the old stream if they exist
             if (window.localStream) {
                 window.localStream.getTracks().forEach(track => track.stop());
+                console.log("Stopped previous local stream tracks");
             }
 
+            // Assign new stream to window.localStream and to local video element
             window.localStream = stream;
             localVideoRef.current.srcObject = stream;
 
+            // Logging to verify track availability
+            console.log("New Video Tracks:", stream.getVideoTracks());
+            console.log("New Audio Tracks:", stream.getAudioTracks());
+
             // Update tracks for all existing connections
             Object.keys(connections).forEach(id => {
-                if (id === socketIdRef.current) return;
+                if (id === socketIdRef.current) return; // Skip our own connection
 
-                // Remove existing tracks
-                const senders = connections[id].getSenders();
-                senders.forEach(sender => {
-                    connections[id].removeTrack(sender);
-                });
+                const connection = connections[id];
+                const videoTrack = stream.getVideoTracks()[0];
+                const audioTrack = stream.getAudioTracks()[0];
+                const senders = connection.getSenders();
 
-                // Add new tracks
-                stream.getTracks().forEach(track => {
-                    connections[id].addTrack(track, stream);
-                });
+                // Replace or add the video track
+                if (videoTrack) {
+                    const videoSender = senders.find(sender => sender.track && sender.track.kind === 'video');
+                    if (videoSender) {
+                        videoSender.replaceTrack(videoTrack);
+                        console.log(`Replaced video track for connection ${id}`);
+                    } else {
+                        connection.addTrack(videoTrack, stream);
+                        console.log(`Added video track for connection ${id}`);
+                    }
+                }
 
-                // Create new offer
-                connections[id].createOffer()
-                    .then(description => connections[id].setLocalDescription(description))
+                // Replace or add the audio track
+                if (audioTrack) {
+                    const audioSender = senders.find(sender => sender.track && sender.track.kind === 'audio');
+                    if (audioSender) {
+                        audioSender.replaceTrack(audioTrack);
+                        console.log(`Replaced audio track for connection ${id}`);
+                    } else {
+                        connection.addTrack(audioTrack, stream);
+                        console.log(`Added audio track for connection ${id}`);
+                    }
+                }
+
+                // Create and send a new offer to update the remote peer with new tracks
+                connection.createOffer()
+                    .then(description => connection.setLocalDescription(description))
                     .then(() => {
                         socketRef.current.emit("signal", id, JSON.stringify({
-                            sdp: connections[id].localDescription
+                            sdp: connection.localDescription
                         }));
+                        console.log(`Sent updated SDP to connection ${id}`);
                     })
                     .catch(e => console.error("Error updating tracks:", e));
             });
         } catch (error) {
-            console.error("getUserMediaSuccess error:", error);
+            console.error("Error in getUserMediaSuccess:", error);
         }
     };
+
+
 
 
     //for when audio and video gets muted
@@ -189,20 +209,22 @@ function VideoMeet() {
 
 
     const getUserMedia = () => {
-        if (video && videoAvailable || audio && audioAvailable) {
+        if ((video && videoAvailable) || (audio && audioAvailable)) {
             navigator.mediaDevices.getUserMedia({ video: video, audio: audio })
-                .then(getUserMediaSuccess) //getusermediasuccess
-                .then((stream) => { })
-                .catch(e => console.log(e))
+                .then(getUserMediaSuccess) // Pass the stream to getUserMediaSuccess
+                .catch(e => console.error("Error accessing media devices:", e));
         } else {
+            // Stop existing tracks if media is not available
             try {
-                const tracks = localVideoRef.current.srcObject.getTracks()
+                const tracks = localVideoRef.current.srcObject.getTracks();
                 tracks.forEach(track => track.stop());
+                console.log("Stopped existing tracks");
             } catch (error) {
-
+                console.error("Error stopping existing tracks:", error);
             }
         }
-    }
+    };
+
 
 
     useEffect(() => {
@@ -219,32 +241,33 @@ function VideoMeet() {
             console.log("Got signal from", fromId, signal);
 
             if (signal.sdp) {
-                connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp))
-                    .then(() => {
-                        if (signal.sdp.type === 'offer') {
-                            return connections[fromId].createAnswer();
-                        }
-                    })
-                    .then(description => {
-                        if (description) {
-                            return connections[fromId].setLocalDescription(description);
-                        }
-                    })
-                    .then(() => {
-                        if (signal.sdp.type === 'offer') {
-                            socketRef.current.emit('signal', fromId, JSON.stringify({
-                                sdp: connections[fromId].localDescription
-                            }));
-                        }
-                    })
-                    .catch(e => {
-                        console.error("Error handling SDP signal:", e);
-                        // If we get an error about remote answer in stable state, ignore it
-                        if (!e.message.includes("Cannot set remote answer in state stable")) {
-                            // Handle other errors
-                            console.error("Critical WebRTC error:", e);
-                        }
-                    });
+                // Check if the signaling state allows setting the remote description
+                if (connections[fromId].signalingState !== "stable" || signal.sdp.type !== "answer") {
+                    connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp))
+                        .then(() => {
+                            if (signal.sdp.type === 'offer') {
+                                return connections[fromId].createAnswer();
+                            }
+                        })
+                        .then(description => {
+                            if (description) {
+                                return connections[fromId].setLocalDescription(description);
+                            }
+                        })
+                        .then(() => {
+                            if (signal.sdp.type === 'offer') {
+                                socketRef.current.emit('signal', fromId, JSON.stringify({
+                                    sdp: connections[fromId].localDescription
+                                }));
+                            }
+                        })
+                        .catch(e => {
+                            console.error("Error handling SDP signal:", e);
+                            if (!e.message.includes("Cannot set remote answer in state stable")) {
+                                console.error("Critical WebRTC error:", e);
+                            }
+                        });
+                }
             }
 
             if (signal.ice) {
@@ -253,7 +276,6 @@ function VideoMeet() {
             }
         }
     };
-
 
     const connectToSocketServer = () => {
         if (!socketRef.current) {
@@ -297,11 +319,7 @@ function VideoMeet() {
             // Define STUN servers
             const configuration = {
                 iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' },
-                    { urls: 'stun:stun3.l.google.com:19302' },
-                    { urls: 'stun:stun4.l.google.com:19302' },
+                    { "urls": "stun:stun.l.google.com:19302" }
                 ]
             };
 
@@ -329,16 +347,12 @@ function VideoMeet() {
                     }));
                 }
             };
-
+            console.log("andu pandu")
             // Handle incoming tracks
             connections[socketsListId].ontrack = (event) => {
-                console.log("Received remote track:", event.streams[0]);
-
+                console.log(`Received remote track for ${socketsListId}`, event.streams[0]);
                 setVideos(prevVideos => {
-                    // Remove any existing video for this socket
                     const filteredVideos = prevVideos.filter(v => v.socketId !== socketsListId);
-
-                    // Add the new video
                     return [...filteredVideos, {
                         socketId: socketsListId,
                         stream: event.streams[0],
@@ -355,6 +369,8 @@ function VideoMeet() {
                 window.localStream.getTracks().forEach(track => {
                     connections[socketsListId].addTrack(track, window.localStream);
                 });
+            } else {
+                console.error("No local stream available to add tracks from.");
             }
 
             // Create offer if we're the one joining
@@ -505,7 +521,7 @@ function VideoMeet() {
                 console.log("Error removing meeting ID:", error);
             }
         }
-        navigate("/home")
+        navigate("/home");
     }
 
 
@@ -549,10 +565,9 @@ function VideoMeet() {
                             .map((video) => (
                                 <div key={video.socketId} className={`relative ${videos.length > 2 ? 'w-4/5 h-4/5 mx-auto' : ''}`}>
                                     <video
-                                        key={video.socketId}
                                         data-socket={video.socketId}
                                         ref={(ref) => {
-                                            if (ref && video.stream) {
+                                            if (ref && ref.srcObject !== video.stream) {
                                                 ref.srcObject = video.stream;
                                             }
                                         }}

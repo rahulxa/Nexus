@@ -53,7 +53,7 @@ function Home() {
                     meetingId: meetingCode,
                     username: appUsername
                 });
-                if (response.status === httpStatus.CREATED) {
+                if (response.status === httpStatus.OK) {
                     navigate(`/${meetingCode}`, { state: { username } });
                     setUsername("");
                     setMeetingCode("");
@@ -73,7 +73,7 @@ function Home() {
             window.localStream = stream;
             if (localVideoRef.current) {
                 localVideoRef.current.srcObject = stream;
-            }  
+            }
         } catch (error) {
             console.log("Error getting permissions:", error);
             setErrorMessage("Unable to access camera or microphone. Please check your permissions.");
@@ -279,9 +279,9 @@ function Home() {
                                     <li className="flex flex-col">
                                         <div className="flex items-center">
                                             <FaQuestionCircle className="text-cyan-400 mr-3 text-xl" />
-                                            <span className="text-base">What if I forget the Meeting ID?</span> {/* Reduced text-lg to text-base */}
+                                            <span className="text-base">How do i get the Meeting ID?</span> {/* Reduced text-lg to text-base */}
                                         </div>
-                                        <span className="text-sm mt-1 ml-8">You can retrieve the Meeting ID from your email or the meeting invite link.</span> {/* Reduced text-base to text-sm */}
+                                        <span className="text-sm mt-1 ml-8">You can retrieve the Meeting ID from the meeting invite link.</span> {/* Reduced text-base to text-sm */}
                                     </li>
                                     <li className="flex flex-col">
                                         <div className="flex items-center">

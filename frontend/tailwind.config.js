@@ -19,6 +19,7 @@ export default {
       keyframes: {
         "background-position-spin": {
           "0%": { backgroundPosition: "top center" },
+          '50%': { backgroundPosition: '100% 50%' },
           "100%": { backgroundPosition: "bottom center" },
         },
         shimmer: {

@@ -102,9 +102,9 @@ function Hero() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1, duration: 1 }}
-                    className="text-center flex justify-center space-x-24 mt-28 ml-10"
+                    className="text-center flex justify-center space-x-24 mt-28 ml-2"
                 >
-                    {['HD Video & Audio', 'Screen Sharing', 'End-to-End Encryption'].map((feature, index) => (
+                    {['HD Video & Audio', 'Screen Sharing', 'In-Call Messaging'].map((feature, index) => (
                         <motion.div
                             key={feature}
                             initial={{ opacity: 0, y: 20 }}
