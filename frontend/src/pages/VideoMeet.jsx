@@ -587,7 +587,7 @@ function VideoMeet() {
             {/* Bottom Controls */}
             <div className={`flex justify-between p-3 ${isChatOpen ? 'w-8/12' : 'w-full'}`}>
                 <div>
-                    <h3 className='text-gray-300 text-md font-semibold mt-4'>Rahul</h3>
+                    <h3 className='text-gray-300 text-md font-semibold mt-4'>{username}</h3>
                 </div>
                 <div className="bg-gray-800 rounded-full shadow-lg ml-28">
                     <div className="flex space-x-14 p-1">
